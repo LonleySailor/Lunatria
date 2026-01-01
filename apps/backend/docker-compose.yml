@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongo_server_security
+    restart: unless-stopped
+    ports:
+      - "${MONGO_PORT}:27017"    # <--- localhost:27018 maps to container:27017
+    volumes:
+      - mongo1_data:/data/db
+      - mongo1_config:/data/configdb
+    networks:
+      - server_net
+
+  redis:
+    image: redis:alpine
+    container_name: redis_server_security
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT}:6379"      # <--- localhost:6380 maps to container:6379
+    volumes:
+      - redis_data:/data
+    networks:
+      - server_net
+
+volumes:
+  mongo1_data:
+  mongo1_config:
+  redis_data:
+
+networks:
+  server_net:

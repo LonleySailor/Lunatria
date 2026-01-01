@@ -1,0 +1,8 @@
+{
+  "/": {
+    "target": "http://lunatria.com",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}

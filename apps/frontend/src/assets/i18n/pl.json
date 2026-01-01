@@ -1,0 +1,39 @@
+{
+    "Toast": {
+        "Success": "Sukces",
+        "Error": "Błąd",
+        "Unauthorized": "Musisz być zalogowany, aby uzyskać dostęp do tej strony."
+    },
+    "Buttons": {
+        "Check All Services": "Sprawdź wszystkie usługi"
+    },
+    "AUTH": {
+        "LOGOUT": "Wyloguj"
+    },
+    "NAVIGATION": {
+        "HOME": "Strona główna"
+    },
+    "PROFILE": {
+        "MENU_PROFILE": "Profil",
+        "USER_PROFILE": "Profil użytkownika",
+        "GENERAL": "Ogólne",
+        "PROFILE_PICTURE": "Zdjęcie profilowe",
+        "SETTINGS": "Ustawienia",
+        "GENERAL_INFO": "Informacje ogólne",
+        "USERNAME": "Nazwa użytkownika",
+        "PROFILE_PICTURE_MANAGEMENT": "Zarządzanie zdjęciem profilowym",
+        "CURRENT_PICTURE": "Aktualne zdjęcie",
+        "UPLOAD_PICTURE": "Prześlij zdjęcie",
+        "DELETE_PICTURE": "Usuń zdjęcie",
+        "UPLOADING": "Przesyłanie",
+        "UPLOAD_REQUIREMENTS": "Wymagania przesyłania:",
+        "SUPPORTED_FORMATS": "Obsługiwane formaty",
+        "MAX_FILE_SIZE": "Maksymalny rozmiar pliku",
+        "RECOMMENDED_SIZE": "Zalecany rozmiar",
+        "SETTINGS_COMING_SOON": "Dodatkowe ustawienia będą dostępne w przyszłych aktualizacjach:",
+        "CHANGE_PASSWORD": "Zmień hasło",
+        "NOTIFICATION_PREFERENCES": "Preferencje powiadomień",
+        "LANGUAGE_SETTINGS": "Ustawienia języka",
+        "THEME_PREFERENCES": "Preferencje motywu"
+    }
+}

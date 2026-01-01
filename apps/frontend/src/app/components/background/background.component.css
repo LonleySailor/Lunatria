@@ -1,0 +1,24 @@
+html, body {
+    overflow-x: hidden;
+    background: url('/assets/lunatria-background.png') no-repeat center center fixed;
+    background-size: cover;
+    background-color: black;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+  }
+  
+  @media (max-width: 768px) {
+    html, body {
+      background-size: cover;
+      background-position: center;
+    }
+  }
+  
+  .glass-layer {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  
+  

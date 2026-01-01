@@ -1,0 +1,28 @@
+<div class="content-wrapper glass-layer">
+    <div class="display-container">
+
+        <div class="glass-card">
+            <h1>Unauthorized</h1>
+
+            <p *ngIf="reason === 'notLoggedIn'">
+                You are not logged in. Please log in to access <strong>{{ source }}</strong>.
+            </p>
+
+            <p *ngIf="reason === 'noAccess'">
+                You are logged in, but do not have access to <strong>{{ source }}</strong>.
+            </p>
+
+            <p *ngIf="reason === 'unknown'">
+                Access denied to <strong>{{ source || 'this service' }}</strong> for unknown reason.
+            </p>
+
+            <a *ngIf="reason === 'notLoggedIn'">
+                <button (click)="loginRedirect()">Log In</button>
+            </a>
+
+        </div>
+        <app-footer></app-footer>
+
+    </div>
+
+    <app-background></app-background>

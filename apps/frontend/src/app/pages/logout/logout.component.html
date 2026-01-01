@@ -1,0 +1,32 @@
+<div class="content-wrapper glass-layer">
+    <div class="display-container">
+        <div class="glass-card">
+            <h1>Logging you out...</h1>
+            <p id="status">Please wait...</p>
+
+            <!-- Step 1: Radarr logs itself out (clears RadarrAuth) -->
+            <iframe *ngIf="step === 'radarr-main'" src="https://radarr.lunatria.com/logout" style="display: none"
+                (load)="onRadarrMainDone()"></iframe>
+
+            <!-- Step 2: Your API clears radarr_auth -->
+            <iframe *ngIf="step === 'radarr-cleanup'" src="https://api.lunatria.com/users/logout-radarr"
+                style="display: none" (load)="onIframeLoaded('radarr')"></iframe>
+
+            <!-- Step 3: Sonarr logs itself out -->
+            <iframe *ngIf="step === 'sonarr-main'" src="https://sonarr.lunatria.com/logout" style="display: none"
+                (load)="onSonarrMainDone()"></iframe>
+
+            <!-- Step 4: Your API clears sonarr_auth -->
+            <iframe *ngIf="step === 'sonarr-cleanup'" src="https://api.lunatria.com/users/logout-sonarr"
+                style="display: none" (load)="onIframeLoaded('sonarr')"></iframe>
+
+            <!-- Jellyfin logout iframe -->
+            <iframe src="https://jellyfin.lunatria.com/jellyfin-logout" style="display: none"
+                (load)="onIframeLoaded('jellyfin')"></iframe>
+
+        </div>
+    </div>
+    <app-footer></app-footer>
+</div>
+
+<app-background></app-background>

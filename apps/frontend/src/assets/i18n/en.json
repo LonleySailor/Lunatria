@@ -1,0 +1,39 @@
+{
+    "Toast": {
+        "Success": "Success",
+        "Error": "Error",
+        "Unauthorized": "You must be logged in to access this page."
+    },
+    "Buttons": {
+        "Check All Services": "Check All Services"
+    },
+    "AUTH": {
+        "LOGOUT": "Logout"
+    },
+    "NAVIGATION": {
+        "HOME": "Home"
+    },
+    "PROFILE": {
+        "MENU_PROFILE": "Profile",
+        "USER_PROFILE": "User Profile",
+        "GENERAL": "General",
+        "PROFILE_PICTURE": "Profile Picture",
+        "SETTINGS": "Settings",
+        "GENERAL_INFO": "General Information",
+        "USERNAME": "Username",
+        "PROFILE_PICTURE_MANAGEMENT": "Profile Picture Management",
+        "CURRENT_PICTURE": "Current Picture",
+        "UPLOAD_PICTURE": "Upload Picture",
+        "DELETE_PICTURE": "Delete Picture",
+        "UPLOADING": "Uploading",
+        "UPLOAD_REQUIREMENTS": "Upload Requirements:",
+        "SUPPORTED_FORMATS": "Supported formats",
+        "MAX_FILE_SIZE": "Maximum file size",
+        "RECOMMENDED_SIZE": "Recommended size",
+        "SETTINGS_COMING_SOON": "Additional settings will be available in future updates:",
+        "CHANGE_PASSWORD": "Change Password",
+        "NOTIFICATION_PREFERENCES": "Notification Preferences",
+        "LANGUAGE_SETTINGS": "Language Settings",
+        "THEME_PREFERENCES": "Theme Preferences"
+    }
+}

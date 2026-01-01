@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Logging out of Jellyfin...</title>
+</head>
+
+<body>
+    <script>
+        localStorage.removeItem("jellyfin_credentials");
+        localStorage.clear(); // optionally clear everything
+        console.log("Logging out of Jellyfin...");
+
+        fetch("https://api.lunatria.com/users/logout-jellyfin", {
+            method: "GET",
+            credentials: "include"
+        })
+            .finally(() => {
+                // Done, either close or redirect
+                window.close();
+            });
+    </script>
+</body>
+
+</html>

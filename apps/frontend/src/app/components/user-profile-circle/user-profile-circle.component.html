@@ -1,0 +1,30 @@
+<div class="profile-circle-container">
+  <div class="profile-circle" (click)="toggleDropdown()">
+    <img 
+      *ngIf="userProfile?.profilePictureUrl && !profileImageError" 
+      [src]="userProfile?.profilePictureUrl"
+      [alt]="userProfile?.username"
+      (error)="onImageError()"
+      (load)="onImageLoad()"
+      class="profile-image"
+    />
+    <div 
+      *ngIf="!userProfile?.profilePictureUrl || profileImageError" 
+      class="profile-initials"
+    >
+      {{ getInitials() }}
+    </div>
+  </div>
+  
+  <div class="dropdown-menu" [class.show]="isDropdownOpen">
+    <div class="dropdown-item" (click)="navigateToHome()">
+      {{ 'NAVIGATION.HOME' | translate }}
+    </div>
+    <div class="dropdown-item" (click)="navigateToProfile()">
+      {{ 'PROFILE.MENU_PROFILE' | translate }}
+    </div>
+    <div class="dropdown-item logout" (click)="logout()">
+      {{ 'AUTH.LOGOUT' | translate }}
+    </div>
+  </div>
+</div>

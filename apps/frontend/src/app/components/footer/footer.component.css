@@ -1,0 +1,17 @@
+footer {
+  width: 100%;
+  text-align: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #D0D0D0;
+  margin-top: auto;
+  position: absolute;
+  left: 0;
+}
+
+@media (max-width: 768px) {
+  footer {
+    padding: 15px;
+    font-size: 0.9rem;
+  }
+}

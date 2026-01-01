@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Logging you in...</title>
+</head>
+
+<body>
+  <script>
+    // Get token info from query params
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    const userId = params.get('userId');
+    const serverId = params.get('serverId') || 'default-server';
+
+    const jellyfinCredentials = {
+      Servers: [
+        {
+          DateLastAccessed: Date.now(),
+          LastConnectionMode: 2,
+          ManualAddress: "https://jellyfin.lunatria.com",
+          manualAddressOnly: true,
+          Name: "jellyfin",
+          Id: serverId,
+          LocalAddress: "http://192.168.33.36:8096",
+          AccessToken: token,
+          UserId: userId,
+        },
+      ],
+    };
+
+    localStorage.setItem(
+      "jellyfin_credentials",
+      JSON.stringify(jellyfinCredentials)
+    );
+
+    // Redirect to Jellyfin main app
+    window.location.href = "/web/index.html";
+  </script>
+</body>
+
+</html>

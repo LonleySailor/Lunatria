@@ -1,0 +1,46 @@
+<div class="glass-card">
+  <h2>Add New User</h2>
+  <form (ngSubmit)="onSubmit()" #userForm="ngForm" >
+    <div class="form-group">
+      <label>Username:</label>
+      <input type="text" [(ngModel)]="username" name="username" required>
+    </div>
+    <div class="form-group">
+      <label>Password:</label>
+      <input type="password" [(ngModel)]="password" name="password" required>
+    </div>
+    <div class="form-group">
+      <label>Email:</label>
+      <input type="email" [(ngModel)]="email" name="email" required>
+    </div>
+    <div class="form-group">
+      <label>User Type:</label>
+      <select [(ngModel)]="usertype" name="usertype" required>
+        <option value="user">User</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+   <div class="form-group">
+    <label>Allowed Services:</label>
+    <div class="checkbox-list">
+        <label>
+            <input type="checkbox" [(ngModel)]="allowedServices.jellyfin" name="allowedServices" value="jellyfin">
+            jellyfin
+        </label>
+        <label>
+            <input type="checkbox" [(ngModel)]="allowedServices.nextcloud" name="allowedServices" value="nextcloud">
+            nextcloud
+        </label>
+        <label>
+            <input type="checkbox" [(ngModel)]="allowedServices.radarr" name="allowedServices" value="radarr">
+            radarr
+        </label>
+        <label>
+            <input type="checkbox" [(ngModel)]="allowedServices.sonarr" name="allowedServices" value="sonarr">
+            sonarr
+        </label>
+    </div>
+</div>
+    <button type="submit" [disabled]="!userForm.form.valid">Create User</button>
+  </form>
+</div>

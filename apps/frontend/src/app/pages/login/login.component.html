@@ -1,0 +1,37 @@
+<div class="content-wrapper glass-layer">
+
+  <div class="login-container">
+    <div class="glass-card">
+      <h2>Welcome Back</h2>
+      <div *ngIf="isSessionActive">
+        <p>You are already logged in. Would you like to continue with your existing session?</p>
+        <button (click)="continueWithExistingSession()">Continue</button>
+        <button (click)="logout()">{{ 'AUTH.LOGOUT' | translate }}</button>
+      </div>
+      <form *ngIf="!isSessionActive" (ngSubmit)="onSubmit()" #loginForm="ngForm">
+        <div class="form-group">
+          <input
+            type="text"
+            [(ngModel)]="username"
+            name="username"
+            placeholder="Username"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <input
+            type="password"
+            [(ngModel)]="password"
+            name="password"
+            placeholder="Password"
+            required
+          />
+        </div>
+        <button type="submit" [disabled]="!loginForm.form.valid">Login</button>
+      </form>
+    </div>
+  </div>
+  <app-footer></app-footer>
+
+</div>
+<app-background></app-background>

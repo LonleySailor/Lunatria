@@ -1,0 +1,50 @@
+<div class="content-wrapper glass-layer">
+    <div class="top-bar">
+        <app-user-profile-circle></app-user-profile-circle>
+    </div>
+    
+    <div class="display-container">
+
+        <div class="glass-card">
+            <h1>Admin Panel</h1>
+            
+            <div class="admin-layout">
+
+                <aside class="sidebar">
+                    <ul class="menu">
+                        <ul class="menu">
+                            <li class="menu-item" [ngClass]="{ 'active': selectedSection === 'add-user' }"
+                                (click)="selectSection('add-user')">Add User</li>
+                            <li class="menu-item" [ngClass]="{ 'active': selectedSection === 'credentials' }"
+                                (click)="selectSection('credentials')">Manage Credentials</li>
+                            <li class="menu-item" [ngClass]="{ 'active': selectedSection === 'access' }"
+                                (click)="selectSection('access')">Service Access</li>
+                        </ul>
+
+                    </ul>
+                </aside>
+
+                <div class="main-content">
+                    <!-- Dynamic content goes here based on selected menu -->
+                    <div *ngIf="selectedSection === 'add-user'">
+                        <h2>Add a New User</h2>
+                        <p>This section will let you create new accounts.</p>
+                        <app-admin-add-user></app-admin-add-user>
+                    </div>
+                    <div *ngIf="selectedSection === 'credentials'">
+                        <h2>Manage Credentials</h2>
+                        <p>Here you will manage stored encrypted credentials.</p>
+                        <app-admin-add-credentials></app-admin-add-credentials>
+                    </div>
+                    <div *ngIf="selectedSection === 'access'">
+                        <h2>Service Access</h2>
+                        <p>Configure what services each user has access to.</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <app-footer></app-footer>
+    </div>
+</div>
+<app-background></app-background>

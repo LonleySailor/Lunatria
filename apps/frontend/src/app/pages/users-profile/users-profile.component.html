@@ -1,0 +1,141 @@
+<div class="content-wrapper glass-layer">
+    <div class="top-bar">
+        <app-user-profile-circle></app-user-profile-circle>
+    </div>
+    
+    <div class="display-container">
+
+        <div class="glass-card">
+            <div class="profile-layout">
+
+                <aside class="sidebar">
+                    <ul class="menu">
+                        <li class="menu-item" [ngClass]="{ 'active': selectedSection === 'general' }"
+                            (click)="selectSection('general')">
+                            {{ 'PROFILE.GENERAL' | translate }}
+                        </li>
+                        <li class="menu-item" [ngClass]="{ 'active': selectedSection === 'picture' }"
+                            (click)="selectSection('picture')">
+                            {{ 'PROFILE.PROFILE_PICTURE' | translate }}
+                        </li>
+                        <li class="menu-item" [ngClass]="{ 'active': selectedSection === 'settings' }"
+                            (click)="selectSection('settings')">
+                            {{ 'PROFILE.SETTINGS' | translate }}
+                        </li>
+                    </ul>
+                </aside>
+
+                <div class="main-content">
+                    <!-- General Information Section -->
+                    <div *ngIf="selectedSection === 'general'">
+                        <h2>{{ 'PROFILE.GENERAL_INFO' | translate }}</h2>
+                        <div class="profile-info-section">
+                            <div class="profile-avatar-large">
+                                <img 
+                                    *ngIf="userProfile?.profilePictureUrl && !profileImageError" 
+                                    [src]="userProfile?.profilePictureUrl"
+                                    [alt]="userProfile?.username"
+                                    (error)="onImageError()"
+                                    (load)="onImageLoad()"
+                                    class="profile-image-large"
+                                />
+                                <div 
+                                    *ngIf="!userProfile?.profilePictureUrl || profileImageError" 
+                                    class="profile-initials-large"
+                                >
+                                    {{ getInitials() }}
+                                </div>
+                            </div>
+                            <div class="profile-details">
+                                <div class="profile-field">
+                                    <label>{{ 'PROFILE.USERNAME' | translate }}</label>
+                                    <div class="profile-value">{{ userProfile?.username }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Picture Management Section -->
+                    <div *ngIf="selectedSection === 'picture'">
+                        <h2>{{ 'PROFILE.PROFILE_PICTURE_MANAGEMENT' | translate }}</h2>
+                        <div class="picture-management-section">
+                            <div class="current-picture">
+                                <h3>{{ 'PROFILE.CURRENT_PICTURE' | translate }}</h3>
+                                <div class="profile-avatar-large">
+                                    <img 
+                                        *ngIf="userProfile?.profilePictureUrl && !profileImageError" 
+                                        [src]="userProfile?.profilePictureUrl"
+                                        [alt]="userProfile?.username"
+                                        (error)="onImageError()"
+                                        (load)="onImageLoad()"
+                                        class="profile-image-large"
+                                    />
+                                    <div 
+                                        *ngIf="!userProfile?.profilePictureUrl || profileImageError" 
+                                        class="profile-initials-large"
+                                    >
+                                        {{ getInitials() }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="picture-actions">
+                                <input 
+                                    type="file" 
+                                    id="profile-picture-input"
+                                    accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                                    (change)="onFileSelected($event)"
+                                    style="display: none;"
+                                />
+                                
+                                <button 
+                                    class="action-button upload-button"
+                                    (click)="triggerFileInput()"
+                                    [disabled]="isUploading"
+                                >
+                                    <span *ngIf="!isUploading">{{ 'PROFILE.UPLOAD_PICTURE' | translate }}</span>
+                                    <span *ngIf="isUploading">{{ 'PROFILE.UPLOADING' | translate }}...</span>
+                                </button>
+
+                                <button 
+                                    class="action-button delete-button"
+                                    (click)="deleteProfilePicture()"
+                                    [disabled]="profileImageError || !userProfile?.profilePictureUrl"
+                                >
+                                    {{ 'PROFILE.DELETE_PICTURE' | translate }}
+                                </button>
+                            </div>
+
+                            <div class="upload-info">
+                                <p>{{ 'PROFILE.UPLOAD_REQUIREMENTS' | translate }}</p>
+                                <ul>
+                                    <li>{{ 'PROFILE.SUPPORTED_FORMATS' | translate }}: JPG, PNG, GIF, WebP</li>
+                                    <li>{{ 'PROFILE.MAX_FILE_SIZE' | translate }}: 10MB</li>
+                                    <li>{{ 'PROFILE.RECOMMENDED_SIZE' | translate }}: 300x300px</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Settings Section (placeholder for future features) -->
+                    <div *ngIf="selectedSection === 'settings'">
+                        <h2>{{ 'PROFILE.SETTINGS' | translate }}</h2>
+                        <div class="settings-section">
+                            <p>{{ 'PROFILE.SETTINGS_COMING_SOON' | translate }}</p>
+                            <div class="feature-placeholder">
+                                <ul>
+                                    <li>{{ 'PROFILE.CHANGE_PASSWORD' | translate }}</li>
+                                    <li>{{ 'PROFILE.NOTIFICATION_PREFERENCES' | translate }}</li>
+                                    <li>{{ 'PROFILE.LANGUAGE_SETTINGS' | translate }}</li>
+                                    <li>{{ 'PROFILE.THEME_PREFERENCES' | translate }}</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <app-footer></app-footer>
+    </div>
+</div>
+<app-background></app-background>
