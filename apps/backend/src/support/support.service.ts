@@ -3,6 +3,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom, of, catchError } from 'rxjs';
 import { UsersService } from 'src/users/users.service';
+import { ConfigService } from 'src/config/config.service';
+import { SERVICES_CONSTANTS } from 'src/config/constants';
 
 type ServiceName =
   | 'hoarder'
@@ -17,24 +19,28 @@ type ServiceName =
 export class SupportService {
   private readonly logger = new Logger(SupportService.name);
 
-  private readonly services: Record<ServiceName, string> = {
-    hoarder: 'https://hoarder.lunatria.com',
-    nextcloud: 'https://nextcloud.lunatria.com',
-    vaultwarden: 'https://vaultwarden.lunatria.com',
-    jellyfin: 'https://jellyfin.lunatria.com',
-    radarr: 'https://radarr.lunatria.com',
-    sonarr: 'https://sonarr.lunatria.com',
-    komga: 'https://komga.lunatria.com',
-  };
-
   constructor(
     private readonly http: HttpService,
     private readonly usersService: UsersService,
+    private readonly configService: ConfigService,
   ) {}
 
+  private buildServices(): Record<ServiceName, string> {
+    return {
+      hoarder: this.configService.getServicePublicUrl(SERVICES_CONSTANTS.SERVICES.HOARDER),
+      nextcloud: this.configService.getServicePublicUrl(SERVICES_CONSTANTS.SERVICES.NEXTCLOUD),
+      vaultwarden: this.configService.getServicePublicUrl(SERVICES_CONSTANTS.SERVICES.VAULTWARDEN),
+      jellyfin: this.configService.getServicePublicUrl(SERVICES_CONSTANTS.SERVICES.JELLYFIN),
+      radarr: this.configService.getServicePublicUrl(SERVICES_CONSTANTS.SERVICES.RADARR),
+      sonarr: this.configService.getServicePublicUrl(SERVICES_CONSTANTS.SERVICES.SONARR),
+      komga: this.configService.getServicePublicUrl(SERVICES_CONSTANTS.SERVICES.KOMGA),
+    };
+  }
+
   async getServiceStatuses(): Promise<Record<ServiceName, boolean>> {
+    const services = this.buildServices();
     const entries = await Promise.all(
-      Object.entries(this.services).map(async ([name, url]) => {
+      Object.entries(services).map(async ([name, url]) => {
         const service = name as ServiceName;
 
         try {

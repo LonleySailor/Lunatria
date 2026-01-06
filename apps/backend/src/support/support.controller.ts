@@ -3,8 +3,9 @@ import { SupportService } from './support.service';
 import { AuthenticatedGuard } from 'src/auth/guards/authenticated.guard';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { UsersService } from 'src/users/users.service';
+import { AUTH_CONSTANTS } from 'src/config/constants';
 
-@Controller('support')
+@Controller(AUTH_CONSTANTS.CONTROLLERS.SUPPORT)
 export class SupportController {
   constructor(
     private readonly supportService: SupportService,

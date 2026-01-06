@@ -26,6 +26,6 @@ export class user {
   allowedServices: string[];
 }
 
-export const userModel = SchemaFactory.createForClass(user);
+export const userSchema = SchemaFactory.createForClass(user);
 
-userModel.index({ username: 1 }, { unique: true });
+userSchema.index({ username: 1 }, { unique: true });

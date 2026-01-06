@@ -128,7 +128,7 @@ Authenticate user and create session.
 ```
 
 **Error Codes:**
-- `602` (401): Incorrect email/username
+- `602` (401): Incorrect username
 - `603` (401): Incorrect password
 - `610` (404): User not found
 
@@ -205,7 +205,7 @@ Delete user account (self-deletion).
 **Request Body:**
 ```json
 {
-  "userName": "string",
+  "username": "string",
   "password": "string"
 }
 ```

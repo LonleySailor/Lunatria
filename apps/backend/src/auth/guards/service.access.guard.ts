@@ -23,9 +23,17 @@ export class ServiceAccessGuard implements CanActivate {
     await this.sessionsService.sessionErrorChecking(session);
     const user = await this.userService.getUserById(session.passport.user);
 
+    if (!user) {
+      throwException.NoServiceAccess();
+    }
+
     if (user.userType === 'admin') return true;
 
-    if (!user.allowedServices.includes(serviceName)) {
+    if (!Array.isArray(user.allowedServices)) {
+      throwException.NoServiceAccess();
+    }
+
+    if (!serviceName || !user.allowedServices.includes(serviceName)) {
       throwException.NoServiceAccess(); // custom error handler
     }
 

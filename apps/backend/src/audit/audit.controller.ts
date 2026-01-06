@@ -2,8 +2,9 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { AuditService } from './audit.service';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
+import { AUTH_CONSTANTS } from 'src/config/constants';
 
-@Controller('audit')
+@Controller(AUTH_CONSTANTS.CONTROLLERS.AUDIT)
 @UseGuards(AdminGuard) // You must be logged in
 export class AuditController {
   constructor(private readonly auditService: AuditService) {}

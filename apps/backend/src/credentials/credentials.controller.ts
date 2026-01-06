@@ -14,8 +14,9 @@ import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { UsersService } from 'src/users/users.service';
 import { throwCredentialsException } from 'src/responseStatus/credentials.response';
 import { throwException } from 'src/responseStatus/auth.response';
+import { AUTH_CONSTANTS } from 'src/config/constants';
 
-@Controller('credentials')
+@Controller(AUTH_CONSTANTS.CONTROLLERS.CREDENTIALS)
 @UseGuards(AdminGuard)
 export class CredentialsController {
   constructor(

@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import Redis from 'ioredis';
 import { CredentialsService } from 'src/credentials/credentials.service';
 import { AuditService } from 'src/audit/audit.service';
+import { REDIS_CLIENT } from 'src/redis/redis.module';
 
 @Injectable()
 export class JellyfinService {
@@ -13,8 +14,16 @@ export class JellyfinService {
     private readonly http: HttpService,
     private readonly credentialsService: CredentialsService,
     private readonly auditService: AuditService,
+    @Inject(REDIS_CLIENT) redis: Redis,
   ) {
-    this.redis = new Redis(process.env.REDIS_URL);
+    this.redis = redis;
+  }
+
+  getBaseUrl(): string {
+    if (!this.jellyfinUrl) {
+      throw new Error('JELLYFIN_BASE_URL is not configured');
+    }
+    return this.jellyfinUrl;
   }
 
   async getJellyfinToken(
@@ -42,7 +51,7 @@ export class JellyfinService {
         `Attempting to authenticate with Jellyfin at ${this.jellyfinUrl}`,
       );
       const res = await this.http.axiosRef.post(
-        `${this.jellyfinUrl}/Users/AuthenticateByName`,
+        `${this.getBaseUrl()}/Users/AuthenticateByName`,
         {
           Username: creds.username,
           Pw: creds.password,

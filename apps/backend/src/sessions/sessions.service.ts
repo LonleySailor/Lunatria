@@ -1,16 +1,21 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import Redis from 'ioredis';
 import { Model, Types } from 'mongoose';
 import { throwSessionException } from 'src/responseStatus/sessions.response';
 import { user } from 'src/users/users.schema';
+import { REDIS_CLIENT } from 'src/redis/redis.module';
+import { DATABASE_CONSTANTS } from 'src/config/constants';
 
 @Injectable()
 export class SessionsService {
   private readonly redis: Redis;
 
-  constructor(@InjectModel(user.name) private userModel: Model<user>) {
-    this.redis = new Redis(process.env.REDIS_URL);
+  constructor(
+    @InjectModel(DATABASE_CONSTANTS.SCHEMAS.USER) private userModel: Model<user>,
+    @Inject(REDIS_CLIENT) redis: Redis,
+  ) {
+    this.redis = redis;
   }
 
   async saveSession(

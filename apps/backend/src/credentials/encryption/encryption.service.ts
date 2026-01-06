@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import * as crypto from 'crypto';
+import { AUTH_CONSTANTS } from 'src/config/constants';
 
 @Injectable()
 export class EncryptionService {
-  private readonly algorithm = 'aes-256-cbc';
+  private readonly algorithm = AUTH_CONSTANTS.ENCRYPTION.ALGORITHM;
   private readonly key: Buffer;
 
   constructor() {

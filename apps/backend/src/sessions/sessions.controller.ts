@@ -2,8 +2,10 @@ import { throwSessionException } from 'src/responseStatus/sessions.response';
 import { SessionsService } from 'src/sessions/sessions.service';
 import { AuthenticatedGuard } from 'src/auth/guards/authenticated.guard';
 import { Controller, UseGuards, Get, Request } from '@nestjs/common';
-@Controller('sessions')
-export class SesssionController {
+import { AUTH_CONSTANTS } from 'src/config/constants';
+
+@Controller(AUTH_CONSTANTS.CONTROLLERS.SESSIONS)
+export class SessionController {
   constructor(private readonly sessionService: SessionsService) {}
 
   @UseGuards(AuthenticatedGuard)
