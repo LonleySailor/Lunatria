@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { API_ENDPOINTS } from '../config/constants';
+import { ApiService } from './api.service';
 
 export interface UserProfile {
   username: string;
@@ -12,23 +13,15 @@ export interface UserProfile {
 })
 export class UserProfileService {
 
-  constructor() { }
+  constructor(private api: ApiService) { }
 
   async getUserInfo(): Promise<UserProfile | null> {
     try {
-      const response = await fetch(`${environment.apiBaseUrl}${API_ENDPOINTS.SESSIONS.GET_USER_INFO}`, {
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        return null;
-      }
-
-      const data = await response.json();
-      if (data.responseCode === 705) {
+      const data = await this.api.get<any>(API_ENDPOINTS.SESSIONS.GET_USER_INFO);
+      if (data && data.responseCode === 705) {
         return {
           username: data.username,
-          profilePictureUrl: this.getProfilePictureUrl()
+          profilePictureUrl: this.getProfilePictureUrl(),
         };
       }
       return null;
@@ -47,13 +40,10 @@ export class UserProfileService {
       const formData = new FormData();
       formData.append('profilePicture', file);
 
-      const response = await fetch(`${environment.apiBaseUrl}${API_ENDPOINTS.USERS.PROFILE_PICTURE}`, {
+      const data = await this.api.request(API_ENDPOINTS.USERS.PROFILE_PICTURE, {
         method: 'POST',
-        credentials: 'include',
-        body: formData
+        body: formData,
       });
-
-      const data = await response.json();
 
       if (data.responseCode === 625) {
         return { success: true, message: 'Profile picture uploaded successfully' };
@@ -68,12 +58,7 @@ export class UserProfileService {
 
   async deleteProfilePicture(): Promise<{ success: boolean; message: string }> {
     try {
-      const response = await fetch(`${environment.apiBaseUrl}${API_ENDPOINTS.USERS.PROFILE_PICTURE}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-
-      const data = await response.json();
+      const data = await this.api.delete<any>(API_ENDPOINTS.USERS.PROFILE_PICTURE);
 
       if (data.responseCode === 626) {
         return { success: true, message: 'Profile picture deleted successfully' };

@@ -37,6 +37,14 @@ export const AUTH_CONSTANTS = {
     CHECK_SESSION_ACTIVE: 'issessionactive',
     GET_USER_INFO: 'getuserinfo',
     DESTROY_ALL_SESSIONS: 'destroyallsessions',
+    SUPPORT_SERVICES: 'services',
+    SUPPORT_SERVICE_ACCESS: 'service-access',
+    SUPPORT_IS_ADMIN: 'is-admin',
+    CREDENTIALS_ADD: '/add',
+    CREDENTIALS_GET: ':service',
+    CREDENTIALS_PATCH: ':service',
+    CREDENTIALS_DELETE: ':service',
+    AUDIT_GET: '',
   } as const,
 
   // Guard decorators

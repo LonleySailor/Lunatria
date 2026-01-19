@@ -9,7 +9,7 @@ import { AUTH_CONSTANTS } from 'src/config/constants';
 export class AuditController {
   constructor(private readonly auditService: AuditService) {}
 
-  @Get()
+  @Get(AUTH_CONSTANTS.ENDPOINTS.AUDIT_GET)
   async getAuditLogs(
     @Query('userId') userId?: string,
     @Query('service') service?: string,

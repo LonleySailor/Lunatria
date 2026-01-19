@@ -24,7 +24,7 @@ export class CredentialsController {
     private readonly userService: UsersService,
   ) { }
 
-  @Post('/add')
+  @Post(AUTH_CONSTANTS.ENDPOINTS.CREDENTIALS_ADD)
   async addCredential(@Req() req: any, @Body() body: any) {
     const service = body.service;
     const userId = await this.userService.getUserId(body.targetUser);
@@ -38,13 +38,13 @@ export class CredentialsController {
     return await this.credentialsService.setCredential(userId, service, body);
   }
 
-  @Get(':service')
+  @Get(AUTH_CONSTANTS.ENDPOINTS.CREDENTIALS_GET)
   async getCredential(@Param('service') service: string, @Req() req: any) {
     const userId = req.session.passport?.id;
     return this.credentialsService.getCredential(userId, service);
   }
 
-  @Patch(':service')
+  @Patch(AUTH_CONSTANTS.ENDPOINTS.CREDENTIALS_PATCH)
   async updateCredential(
     @Param('service') service: string,
     @Req() req: any,
@@ -54,7 +54,7 @@ export class CredentialsController {
     return this.credentialsService.setCredential(userId, service, body);
   }
 
-  @Delete(':service')
+  @Delete(AUTH_CONSTANTS.ENDPOINTS.CREDENTIALS_DELETE)
   async deleteCredential(@Param('service') service: string, @Req() req: any) {
     const userId = req.session.passport?.id;
     return this.credentialsService.deleteCredential(userId, service);

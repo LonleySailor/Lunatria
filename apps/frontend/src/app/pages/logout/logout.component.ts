@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { NgIf } from '@angular/common'; // ✅ Required for *ngIf
 import { FooterComponent } from '../../components/footer/footer.component';
 import { BackgroundComponent } from '../../components/background/background.component';
-import { environment } from '../../../environments/environment';
+import { ApiService } from '../../services/api.service';
+import { API_ENDPOINTS } from '../../config/constants';
 
 @Component({
     selector: 'app-logout',
@@ -28,7 +29,7 @@ export class LogoutComponent implements OnInit {
     reason: 'all' | 'jellyfin' | 'unknown' = 'unknown';
     source: string = '';
 
-    constructor() { }
+    constructor(private api: ApiService) { }
 
     ngOnInit(): void {
         // Listen for any messages from iframes (if needed)
@@ -36,12 +37,11 @@ export class LogoutComponent implements OnInit {
 
         // Wait for 2 seconds before executing main logout API call
         setTimeout(() => {
-            fetch(`${environment.apiBaseUrl}/users/logout`, {
-                method: 'GET',
-                credentials: 'include',
-            })
-                .then((response) => {
-                    if (!response.ok) throw new Error('Logout failed');
+            this.api.get<any>(API_ENDPOINTS.USERS.LOGOUT)
+                .then((data) => {
+                    if (!(data && data.statusCode === 200 && data.responseCode === 611)) {
+                        throw new Error('Logout failed');
+                    }
                 })
                 .catch((err) => {
                     console.error('Logout failed:', err);

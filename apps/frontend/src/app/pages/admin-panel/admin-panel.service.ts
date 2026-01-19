@@ -16,7 +16,7 @@ export class AdminPanelService {
     allowedServices: string[];
   }) {
 
-    return this.api.post<any>(API_ENDPOINTS.USERS.REGISTER, {
+    return this.api.post(API_ENDPOINTS.USERS.REGISTER, {
       username: userData.username,
       password: userData.password,
       email: userData.email,

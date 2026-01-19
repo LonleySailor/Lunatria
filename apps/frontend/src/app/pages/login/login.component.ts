@@ -64,18 +64,13 @@ export class LoginComponent implements OnInit {
       });
   }
   logout(): void {
-    fetch(`${environment.apiBaseUrl}/users/logout`, {
-      method: 'GET',
-      credentials: 'include'
-    })
-      .then(response => {
-        if (!response.ok) throw new Error('Logout failed');
-        return null;  // no JSON expected
+    this.api.get<any>(API_ENDPOINTS.USERS.LOGOUT)
+      .then(data => {
+        if (data && data.statusCode === 200 && data.responseCode === 611) {
+          window.location.reload();
+        }
       })
-      .then(() => window.location.reload())
-      .catch(err => {
-        // noop
-      });
+      .catch(() => {});
   }
 
 }

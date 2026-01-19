@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { environment } from '../../../environments/environment';
 import { NgIf } from '@angular/common';
 import { BackgroundComponent } from '../../components/background/background.component';
 import { FooterComponent } from '../../components/footer/footer.component';
-
+import { ApiService } from '../../services/api.service';
+import { API_ENDPOINTS } from '../../config/constants';
 
 
 @Component({
@@ -19,7 +19,7 @@ export class UnauthorizedComponent implements OnInit {
   reason: 'notLoggedIn' | 'noAccess' | 'unknown' = 'unknown';
   source: string = '';
 
-  constructor(private route: ActivatedRoute) { }
+  constructor(private route: ActivatedRoute, private api: ApiService) { }
   ngOnInit(): void {
     this.source = this.route.snapshot.queryParamMap.get('source') ?? '';
 
@@ -28,19 +28,14 @@ export class UnauthorizedComponent implements OnInit {
       return;
     }
 
-    fetch(`${environment.apiBaseUrl}/support/service-access?service=${this.source}`, {
-      credentials: 'include',
-    })
-      .then(res => res.json())
+    this.api.get<any>(`${API_ENDPOINTS.SUPPORT.BASE}/service-access?service=${this.source}`)
       .then(data => {
         if (data.responseCode === 702) {
-          this.reason = 'notLoggedIn'
-        }
-        if (data.access === false) {
-          this.reason = 'noAccess'
-        }
-        if (data.access === true) {
-          this.reason = 'unknown'
+          this.reason = 'notLoggedIn';
+        } else if (data.access === false) {
+          this.reason = 'noAccess';
+        } else if (data.access === true) {
+          this.reason = 'unknown';
         }
       })
       .catch(() => {
