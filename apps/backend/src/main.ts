@@ -34,7 +34,8 @@ async function bootstrap() {
         // Allow both the root domain and any subdomain
         if (
           hostname === domainName ||
-          hostname.endsWith(`.${domainName}`)
+          hostname.endsWith(`.${domainName}`) ||
+          hostname === 'localhost'
         ) {
           return callback(null, true);
         }

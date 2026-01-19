@@ -21,7 +21,7 @@ export class ButtonsComponent implements OnInit, OnDestroy {
     // Set up refresh interval
     this.ngZone.runOutsideAngular(() => {
       this.intervalId = setInterval(() => {
-        window.location.reload();
+        this.checkAllServices();
       }, 30000);
     });
   }
@@ -40,10 +40,7 @@ export class ButtonsComponent implements OnInit, OnDestroy {
             this.serviceStatuses = { ...statuses };
           });
         },
-        error: (error) => {
-          // Handle error appropriately, e.g., show a notification or log
-          console.error('Error fetching service statuses:', error);
-        }
+        error: () => {}
       });
     });
   }

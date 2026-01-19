@@ -9,7 +9,6 @@ import { AUTH_CONSTANTS } from 'src/config/constants';
 export class SupportController {
   constructor(
     private readonly supportService: SupportService,
-    private readonly usersService: UsersService,
   ) { }
 
   @Get('services')

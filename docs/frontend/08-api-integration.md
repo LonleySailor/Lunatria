@@ -88,6 +88,37 @@ Development proxy setup in `proxy.conf.json`:
 
 ## Fetch-Based API Pattern
 
+### Central ApiService
+
+Lunatria centralizes API calls through a lightweight `ApiService` wrapper over `fetch` that automatically includes cookies and parses JSON responses.
+
+```typescript
+// apps/frontend/src/app/services/api.service.ts
+async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  const response = await fetch(`${environment.apiBaseUrl}${endpoint}`, {
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    ...options,
+  });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return await response.json();
+}
+```
+
+### Constants-Driven Endpoints
+
+All endpoint paths are defined in a single constants file to avoid hardcoding routes in components/services:
+
+```typescript
+// apps/frontend/src/app/config/constants.ts
+export const API_ENDPOINTS = {
+  USERS: { LOGIN: '/users/login', LOGOUT: '/users/logout', REGISTER: '/users/register', PROFILE_PICTURE: '/users/profile-picture' },
+  SESSIONS: { IS_ACTIVE: '/sessions/issessionactive', GET_USER_INFO: '/sessions/getuserinfo' },
+  SUPPORT: { IS_ADMIN: '/support/is-admin', SERVICES: '/support/services' },
+  CREDENTIALS: { ADD: '/credentials/add' },
+} as const;
+```
+
 ### Standard Fetch Implementation
 
 ```typescript
@@ -120,34 +151,24 @@ async apiCall(endpoint: string, options: RequestInit = {}): Promise<any> {
 #### Login Implementation
 
 ```typescript
-// LoginComponent.onSubmit()
+// LoginComponent.onSubmit() using ApiService + constants
 onSubmit() {
-  fetch(`${environment.apiBaseUrl}/users/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    credentials: 'include',
-    body: JSON.stringify({
-      username: this.username,
-      password: this.password
-    })
+  this.api.post(API_ENDPOINTS.USERS.LOGIN, {
+    username: this.username,
+    password: this.password
   })
-    .then(response => response.json())
-    .then(data => {
-      if (data.responseCode === 609) {
-        // Login successful - responseCode 609
-        console.log('Logged in as:', data.User);
-        this.router.navigate(['/home']);
-      } else if (data.responseCode === 603) {
-        // Incorrect password - responseCode 603
-        alert('Incorrect password');
-      } else if (data.responseCode === 602) {
-        // Incorrect username - responseCode 602
-        alert('Incorrect username');
-      } else {
-        console.log('Unknown response code:', data.responseCode);
-      }
+  .then(data => {
+    if (data.responseCode === 609) {
+      this.router.navigate(['/home']);
+    } else if (data.responseCode === 603) {
+      this.toastr.error(this.translate.instant('AUTH.IncorrectPassword'), this.translate.instant('Toast.Error'));
+    } else if (data.responseCode === 602) {
+      this.toastr.error(this.translate.instant('AUTH.IncorrectUsername'), this.translate.instant('Toast.Error'));
+    } else {
+      this.toastr.error(this.translate.instant('AUTH.UnknownResponse'), this.translate.instant('Toast.Error'));
+    }
+  })
+  .catch(() => this.toastr.error(this.translate.instant('Toast.Unauthorized'), this.translate.instant('Toast.Error')));
     })
     .catch(error => console.error('Error:', error));
 }

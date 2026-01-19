@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import * as bcrypt from 'bcrypt';
-import { userModel } from '../src/users/users.schema';
-const usersModel = mongoose.model('user', userModel);
+import { userSchema } from '../src/users/users.schema';
+const usersModel = mongoose.model('user', userSchema);
 
 const MONGO_PORT = process.env.MONGO_PORT || '27018';
 const MONGO_HOST = process.env.MONGO_HOST || 'localhost';
@@ -14,8 +14,8 @@ async function createAdmin() {
         await mongoose.connect(mongoUri, {});
         console.log(`Connected to MongoDB at ${mongoUri}`);
 
-        const username = 'Hitler';
-        const email = 'akacprzak@protonmail.com';
+        const username = 'Placeholder';
+        const email = 'placeholder@example.com';
         const userType = 'admin';
         const allowedServices: string[] = [];
         const userPassword = 'placeholder'; // Replace before running!

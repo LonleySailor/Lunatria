@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
+import { API_ENDPOINTS } from '../config/constants';
 
 export interface UserProfile {
   username: string;
@@ -15,7 +16,7 @@ export class UserProfileService {
 
   async getUserInfo(): Promise<UserProfile | null> {
     try {
-      const response = await fetch(`${environment.apiBaseUrl}/sessions/getuserinfo`, {
+      const response = await fetch(`${environment.apiBaseUrl}${API_ENDPOINTS.SESSIONS.GET_USER_INFO}`, {
         credentials: 'include',
       });
 
@@ -38,7 +39,7 @@ export class UserProfileService {
   }
 
   getProfilePictureUrl(): string {
-    return `${environment.apiBaseUrl}/users/profile-picture`;
+    return `${environment.apiBaseUrl}${API_ENDPOINTS.USERS.PROFILE_PICTURE}`;
   }
 
   async uploadProfilePicture(file: File): Promise<{ success: boolean; message: string }> {
@@ -46,7 +47,7 @@ export class UserProfileService {
       const formData = new FormData();
       formData.append('profilePicture', file);
 
-      const response = await fetch(`${environment.apiBaseUrl}/users/profile-picture`, {
+      const response = await fetch(`${environment.apiBaseUrl}${API_ENDPOINTS.USERS.PROFILE_PICTURE}`, {
         method: 'POST',
         credentials: 'include',
         body: formData
@@ -67,7 +68,7 @@ export class UserProfileService {
 
   async deleteProfilePicture(): Promise<{ success: boolean; message: string }> {
     try {
-      const response = await fetch(`${environment.apiBaseUrl}/users/profile-picture`, {
+      const response = await fetch(`${environment.apiBaseUrl}${API_ENDPOINTS.USERS.PROFILE_PICTURE}`, {
         method: 'DELETE',
         credentials: 'include',
       });

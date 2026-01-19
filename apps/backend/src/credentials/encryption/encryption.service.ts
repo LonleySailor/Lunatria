@@ -9,6 +9,7 @@ export class EncryptionService {
 
   constructor() {
     const secret = process.env.CREDENTIAL_ENCRYPTION_KEY;
+    console.log('Encryption key length:', secret?.length);
     if (!secret || secret.length !== 32) {
       throw new Error('CREDENTIAL_ENCRYPTION_KEY must be 32 characters long');
     }

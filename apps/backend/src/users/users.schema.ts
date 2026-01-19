@@ -7,7 +7,7 @@ export class user {
   @Prop({ type: Types.ObjectId, default: () => new Types.ObjectId() })
   _id: Types.ObjectId;
 
-  @Prop({ required: [true, 'name is required'], unique: false })
+  @Prop({ type: String, required: [true, 'name is required'], unique: false })
   username: string;
 
   @Prop({ type: String, required: [true, 'password is required'] })

@@ -7,6 +7,10 @@ import { FooterComponent } from '../../components/footer/footer.component';
 import { AuthService } from '../../services/auth.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { environment } from '../../../environments/environment';
+import { ToastrService } from 'ngx-toastr';
+import { TranslateService } from '@ngx-translate/core';
+import { ApiService } from '../../services/api.service';
+import { API_ENDPOINTS } from '../../config/constants';
 
 @Component({
   selector: 'app-login',
@@ -19,9 +23,10 @@ export class LoginComponent implements OnInit {
   username: string = '';
   password: string = '';
   isSessionActive = false;
+  isSubmitting = false;
 
 
-  constructor(private router: Router, private authService: AuthService) { }
+  constructor(private router: Router, private authService: AuthService, private toastr: ToastrService, private translate: TranslateService, private api: ApiService) { }
   ngOnInit(): void {
     this.checkSessionStatus();
   }
@@ -35,36 +40,28 @@ export class LoginComponent implements OnInit {
     this.router.navigate(['/home']);
   }
   onSubmit() {
-    fetch(`${environment.apiBaseUrl}/users/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include',
-      body: JSON.stringify({
-        username: this.username,
-        password: this.password
-      })
-    })
-      .then(response => response.json())
+    this.isSubmitting = true;
+    this.api.post<any>(API_ENDPOINTS.USERS.LOGIN, { username: this.username, password: this.password })
       .then(data => {
         if (data.responseCode === 609) {
           // Login successful
-          console.log('Logged in as:', data.User);
           this.router.navigate(['/home']);
         } else if (data.responseCode === 603) {
           // Incorrect password
-          console.log('Incorrect password');
-          alert('Incorrect password');
+          this.toastr.error(this.translate.instant('AUTH.IncorrectPassword'), this.translate.instant('Toast.Error'));
         } else if (data.responseCode === 602) {
           // Incorrect username
-          console.log('Incorrect username');
-          alert('Incorrect username');
+          this.toastr.error(this.translate.instant('AUTH.IncorrectUsername'), this.translate.instant('Toast.Error'));
         } else {
-          console.log('Unknown response code:', data.responseCode);
+          this.toastr.error(this.translate.instant('AUTH.UnknownResponse'), this.translate.instant('Toast.Error'));
         }
       })
-      .catch(error => console.error('Error:', error));
+      .catch(() => {
+        this.toastr.error(this.translate.instant('Toast.Unauthorized'), this.translate.instant('Toast.Error'));
+      })
+      .finally(() => {
+        this.isSubmitting = false;
+      });
   }
   logout(): void {
     fetch(`${environment.apiBaseUrl}/users/logout`, {
@@ -77,7 +74,7 @@ export class LoginComponent implements OnInit {
       })
       .then(() => window.location.reload())
       .catch(err => {
-        console.error('Logout failed', err);
+        // noop
       });
   }
 

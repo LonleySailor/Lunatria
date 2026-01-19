@@ -9,7 +9,8 @@
     "start:frontend": "npm run start -w apps/frontend",
     "build:frontend": "npm run build -w apps/frontend",
     "start:backend": "npm run start -w apps/backend",
-    "build:backend": "npm run build -w apps/backend"
+    "build:backend": "npm run build -w apps/backend",
+    "start:backend:dev": "npm run start:dev -w apps/backend"
   },
   "devDependencies": {
     "typescript": "~5.7.2"

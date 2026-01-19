@@ -2,13 +2,17 @@
     "Toast": {
         "Success": "Success",
         "Error": "Error",
-        "Unauthorized": "You must be logged in to access this page."
+        "Unauthorized": "You must be logged in to access this page.",
+        "AdminOnly": "You must be an admin to access this page."
     },
     "Buttons": {
         "Check All Services": "Check All Services"
     },
     "AUTH": {
-        "LOGOUT": "Logout"
+        "LOGOUT": "Logout",
+        "IncorrectPassword": "Incorrect password",
+        "IncorrectUsername": "Incorrect username",
+        "UnknownResponse": "Unknown login error"
     },
     "NAVIGATION": {
         "HOME": "Home"
