@@ -6,7 +6,6 @@ import { BackgroundComponent } from '../../components/background/background.comp
 import { FooterComponent } from '../../components/footer/footer.component';
 import { AuthService } from '../../services/auth.service';
 import { TranslateModule } from '@ngx-translate/core';
-import { environment } from '../../../environments/environment';
 import { ToastrService } from 'ngx-toastr';
 import { TranslateService } from '@ngx-translate/core';
 import { ApiService } from '../../services/api.service';
@@ -65,13 +64,7 @@ export class LoginComponent implements OnInit {
       });
   }
   logout(): void {
-    this.api.get<any>(API_ENDPOINTS.USERS.LOGOUT)
-      .then(data => {
-        if (data && data.statusCode === 200 && data.responseCode === RESPONSE_CODES.AUTH.USER_LOGGED_OUT_SUCCESSFULLY) {
-          window.location.reload();
-        }
-      })
-      .catch(() => {});
+    this.authService.logout();
   }
 
 }

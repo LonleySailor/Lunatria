@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import { ApiService } from './api.service';
 import { API_ENDPOINTS } from '../config/constants';
 import { RESPONSE_CODES } from '../config/response-codes.const';
@@ -7,7 +8,7 @@ import { RESPONSE_CODES } from '../config/response-codes.const';
   providedIn: 'root'
 })
 export class AuthService {
-  constructor(private api: ApiService) { }
+  constructor(private api: ApiService, private router: Router) { }
 
   async isUserLoggedIn(): Promise<boolean> {
     try {
@@ -19,14 +20,20 @@ export class AuthService {
     }
   }
 
-  logout(): void {
-    this.api.get<any>(API_ENDPOINTS.USERS.LOGOUT)
-      .then(data => {
-        if (data && data.statusCode === 200 && data.responseCode === RESPONSE_CODES.AUTH.USER_LOGGED_OUT_SUCCESSFULLY) {
-          window.location.reload();
-        }
-      })
-      .catch(() => {});
+  async logout(): Promise<void> {
+    try {
+      const data = await this.api.get<any>(API_ENDPOINTS.USERS.LOGOUT);
+      const isSuccess = data && data.statusCode === 200 && data.responseCode === RESPONSE_CODES.AUTH.USER_LOGGED_OUT_SUCCESSFULLY;
+
+      if (!isSuccess) {
+        throw new Error('Logout failed');
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+    } finally {
+      // Always take the user back to the login screen so they can re-authenticate.
+      this.router.navigate(['/login']);
+    }
   }
 
   async isUserAdmin(): Promise<boolean> {
