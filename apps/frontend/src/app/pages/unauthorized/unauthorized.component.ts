@@ -5,6 +5,7 @@ import { BackgroundComponent } from '../../components/background/background.comp
 import { FooterComponent } from '../../components/footer/footer.component';
 import { ApiService } from '../../services/api.service';
 import { API_ENDPOINTS } from '../../config/constants';
+import { RESPONSE_CODES } from '../../config/response-codes.const';
 
 
 @Component({
@@ -30,7 +31,7 @@ export class UnauthorizedComponent implements OnInit {
 
     this.api.get<any>(`${API_ENDPOINTS.SUPPORT.BASE}/service-access?service=${this.source}`)
       .then(data => {
-        if (data.responseCode === 702) {
+        if (data.responseCode === RESPONSE_CODES.SESSIONS.SESSION_NOT_FOUND) {
           this.reason = 'notLoggedIn';
         } else if (data.access === false) {
           this.reason = 'noAccess';

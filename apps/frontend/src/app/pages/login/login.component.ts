@@ -11,6 +11,7 @@ import { ToastrService } from 'ngx-toastr';
 import { TranslateService } from '@ngx-translate/core';
 import { ApiService } from '../../services/api.service';
 import { API_ENDPOINTS } from '../../config/constants';
+import { RESPONSE_CODES } from '../../config/response-codes.const';
 
 @Component({
   selector: 'app-login',
@@ -43,13 +44,13 @@ export class LoginComponent implements OnInit {
     this.isSubmitting = true;
     this.api.post<any>(API_ENDPOINTS.USERS.LOGIN, { username: this.username, password: this.password })
       .then(data => {
-        if (data.responseCode === 609) {
+        if (data.responseCode === RESPONSE_CODES.AUTH.USER_LOGGED_IN) {
           // Login successful
           this.router.navigate(['/home']);
-        } else if (data.responseCode === 603) {
+        } else if (data.responseCode === RESPONSE_CODES.AUTH.INCORRECT_PASSWORD) {
           // Incorrect password
           this.toastr.error(this.translate.instant('AUTH.IncorrectPassword'), this.translate.instant('Toast.Error'));
-        } else if (data.responseCode === 602) {
+        } else if (data.responseCode === RESPONSE_CODES.AUTH.INCORRECT_EMAIL) {
           // Incorrect username
           this.toastr.error(this.translate.instant('AUTH.IncorrectUsername'), this.translate.instant('Toast.Error'));
         } else {
@@ -66,7 +67,7 @@ export class LoginComponent implements OnInit {
   logout(): void {
     this.api.get<any>(API_ENDPOINTS.USERS.LOGOUT)
       .then(data => {
-        if (data && data.statusCode === 200 && data.responseCode === 611) {
+        if (data && data.statusCode === 200 && data.responseCode === RESPONSE_CODES.AUTH.USER_LOGGED_OUT_SUCCESSFULLY) {
           window.location.reload();
         }
       })

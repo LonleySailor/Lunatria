@@ -1,67 +1,84 @@
 import { createCustomException } from './response.utils';
+import { AuthResponseCode } from './response-codes.enum';
 
 class ThrowAuthExceptionClass {
   EmailNeedsVerification(): never {
     throw createCustomException(
-      601 /*Custom response code*/,
-      422 /*Status Code  403*/,
+      AuthResponseCode.EMAIL_NEEDS_VERIFICATION,
+      422,
     );
   }
 
   IncorrectEmail(): never {
-    throw createCustomException(602, 401);
+    throw createCustomException(AuthResponseCode.INCORRECT_EMAIL, 401);
   }
 
   IncorrectPassword(): never {
-    throw createCustomException(603, 401);
+    throw createCustomException(AuthResponseCode.INCORRECT_PASSWORD, 401);
   }
+
   InvalidVerificationCode(): never {
-    throw createCustomException(604, 401);
+    throw createCustomException(AuthResponseCode.INVALID_VERIFICATION_CODE, 401);
   }
+
   EmailVerifiedSuccessfully(): never {
-    throw createCustomException(605, 200);
+    throw createCustomException(AuthResponseCode.EMAIL_VERIFIED_SUCCESSFULLY, 200);
   }
+
   VerificationCodeSent(): never {
-    throw createCustomException(606, 200);
+    throw createCustomException(AuthResponseCode.VERIFICATION_CODE_SENT, 200);
   }
+
   UsernameAlreadyUsed(): never {
-    throw createCustomException(607, 409);
+    throw createCustomException(AuthResponseCode.USERNAME_ALREADY_USED, 409);
   }
+
   EmailAlreadyUsed(): never {
-    throw createCustomException(608, 409);
+    throw createCustomException(AuthResponseCode.EMAIL_ALREADY_USED, 409);
   }
+
   UserloggedIn(data?: any): never {
-    throw createCustomException(609, 200, data);
+    throw createCustomException(AuthResponseCode.USER_LOGGED_IN, 200, data);
   }
+
   Usernotfound(): never {
-    throw createCustomException(610, 404);
+    throw createCustomException(AuthResponseCode.USER_NOT_FOUND, 404);
   }
+
   UserLoggedOutSuccessfully(): never {
-    throw createCustomException(611, 200);
+    throw createCustomException(AuthResponseCode.USER_LOGGED_OUT_SUCCESSFULLY, 200);
   }
+
   PasswordResetEmailSentSuccessfully(): never {
-    throw createCustomException(612, 200);
+    throw createCustomException(AuthResponseCode.PASSWORD_RESET_EMAIL_SENT, 200);
   }
+
   InvalidOrExpiredToken(): never {
-    throw createCustomException(613, 401);
+    throw createCustomException(AuthResponseCode.INVALID_OR_EXPIRED_TOKEN, 401);
   }
+
   PasswordResetSuccessfully(): never {
-    throw createCustomException(614, 200);
+    throw createCustomException(AuthResponseCode.PASSWORD_RESET_SUCCESSFULLY, 200);
   }
+
   PleaseVerifyYourEmail(data?: any): never {
-    throw createCustomException(615, 202, data);
+    throw createCustomException(AuthResponseCode.PLEASE_VERIFY_YOUR_EMAIL, 202, data);
   }
-  VerificationCodeSentSuccessfully() {
-    throw createCustomException(616, 200);
+
+  VerificationCodeSentSuccessfully(): never {
+    throw createCustomException(AuthResponseCode.VERIFICATION_CODE_SENT_SUCCESSFULLY, 200);
   }
-  UserDeletedSuccessfully() {
-    throw createCustomException(617, 200);
+
+  UserDeletedSuccessfully(): never {
+    throw createCustomException(AuthResponseCode.USER_DELETED_SUCCESSFULLY, 200);
   }
-  OnlyForAdmin() {
-    throw createCustomException(618, 401);
+
+  OnlyForAdmin(): never {
+    throw createCustomException(AuthResponseCode.ONLY_FOR_ADMIN, 401);
   }
-  NoServiceAccess() {
-    throw createCustomException(619, 401);
+
+  NoServiceAccess(): never {
+    throw createCustomException(AuthResponseCode.NO_SERVICE_ACCESS, 401);
   }
 }
 

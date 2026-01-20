@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { API_ENDPOINTS } from '../config/constants';
 import { ApiService } from './api.service';
+import { RESPONSE_CODES } from '../config/response-codes.const';
 
 export interface UserProfile {
   username: string;
@@ -18,7 +19,7 @@ export class UserProfileService {
   async getUserInfo(): Promise<UserProfile | null> {
     try {
       const data = await this.api.get<any>(API_ENDPOINTS.SESSIONS.GET_USER_INFO);
-      if (data && data.responseCode === 705) {
+      if (data && data.responseCode === RESPONSE_CODES.SESSIONS.USER_INFO_FETCHED_SUCCESSFULLY) {
         return {
           username: data.username,
           profilePictureUrl: this.getProfilePictureUrl(),
@@ -45,7 +46,7 @@ export class UserProfileService {
         body: formData,
       });
 
-      if (data.responseCode === 625) {
+      if (data.responseCode === RESPONSE_CODES.PROFILE.PROFILE_PICTURE_UPLOADED_SUCCESSFULLY) {
         return { success: true, message: 'Profile picture uploaded successfully' };
       } else {
         return { success: false, message: this.getErrorMessage(data.responseCode) };
@@ -60,7 +61,7 @@ export class UserProfileService {
     try {
       const data = await this.api.delete<any>(API_ENDPOINTS.USERS.PROFILE_PICTURE);
 
-      if (data.responseCode === 626) {
+      if (data.responseCode === RESPONSE_CODES.PROFILE.PROFILE_PICTURE_DELETED_SUCCESSFULLY) {
         return { success: true, message: 'Profile picture deleted successfully' };
       } else {
         return { success: false, message: this.getErrorMessage(data.responseCode) };
@@ -73,13 +74,13 @@ export class UserProfileService {
 
   private getErrorMessage(responseCode: number): string {
     const errorMessages: { [key: number]: string } = {
-      620: 'Profile picture is required',
-      621: 'Invalid file type. Please use JPG, PNG, GIF, or WebP',
-      622: 'File is too large. Maximum size is 5MB',
-      623: 'Profile picture upload failed',
-      624: 'No profile picture found',
-      610: 'User not found',
-      618: 'Admin access required'
+      [RESPONSE_CODES.PROFILE.PROFILE_PICTURE_REQUIRED]: 'Profile picture is required',
+      [RESPONSE_CODES.PROFILE.INVALID_FILE_TYPE]: 'Invalid file type. Please use JPG, PNG, GIF, or WebP',
+      [RESPONSE_CODES.PROFILE.FILE_TOO_LARGE]: 'File is too large. Maximum size is 5MB',
+      [RESPONSE_CODES.PROFILE.PROFILE_PICTURE_UPLOAD_FAILED]: 'Profile picture upload failed',
+      [RESPONSE_CODES.PROFILE.NO_PROFILE_PICTURE_FOUND]: 'No profile picture found',
+      [RESPONSE_CODES.AUTH.USER_NOT_FOUND]: 'User not found',
+      [RESPONSE_CODES.AUTH.ONLY_FOR_ADMIN]: 'Admin access required'
     };
 
     return errorMessages[responseCode] || 'Unknown error occurred';

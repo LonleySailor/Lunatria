@@ -4,6 +4,7 @@ import { FooterComponent } from '../../components/footer/footer.component';
 import { BackgroundComponent } from '../../components/background/background.component';
 import { ApiService } from '../../services/api.service';
 import { API_ENDPOINTS } from '../../config/constants';
+import { RESPONSE_CODES } from '../../config/response-codes.const';
 
 @Component({
     selector: 'app-logout',
@@ -39,7 +40,7 @@ export class LogoutComponent implements OnInit {
         setTimeout(() => {
             this.api.get<any>(API_ENDPOINTS.USERS.LOGOUT)
                 .then((data) => {
-                    if (!(data && data.statusCode === 200 && data.responseCode === 611)) {
+                    if (!(data && data.statusCode === 200 && data.responseCode === RESPONSE_CODES.AUTH.USER_LOGGED_OUT_SUCCESSFULLY)) {
                         throw new Error('Logout failed');
                     }
                 })

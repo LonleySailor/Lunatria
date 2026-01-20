@@ -22,7 +22,6 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     importProvidersFrom(
       BrowserAnimationsModule,
-      HttpClientModule,
       TranslateModule.forRoot({
         loader: {
           provide: TranslateLoader,

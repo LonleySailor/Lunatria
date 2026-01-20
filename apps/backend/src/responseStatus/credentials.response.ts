@@ -1,14 +1,16 @@
 import { createCustomException } from './response.utils';
+import { AuthResponseCode, CredentialsResponseCode } from './response-codes.enum';
 
 class ThrowCredentialsExceptionClass {
   EmailNeedsVerification(): never {
     throw createCustomException(
-      601 /*Custom response code*/,
-      422 /*Status Code  403*/,
+      AuthResponseCode.EMAIL_NEEDS_VERIFICATION,
+      422,
     );
   }
+
   CredentialsAlreadyExist(): never {
-    throw createCustomException(801, 409);
+    throw createCustomException(CredentialsResponseCode.CREDENTIALS_ALREADY_EXIST, 409);
   }
 }
 

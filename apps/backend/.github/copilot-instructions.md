@@ -45,14 +45,35 @@ External service credentials stored encrypted in MongoDB via `EncryptionService`
 
 ### Custom Exception Handling
 
-Centralized error throwing via `createCustomException()` in [response.utils.ts](src/responseStatus/response.utils.ts):
+Centralized error throwing via response code enums in [response-codes.enum.ts](src/responseStatus/response-codes.enum.ts):
 
 ```typescript
-throwException.Usernotfound(); // Defined in auth.response.ts
-throwSessionException.SessionNotFound(); // Defined in sessions.response.ts
+import {
+  AuthResponseCode,
+  SessionResponseCode,
+  CredentialsResponseCode,
+} from 'src/responseStatus/response-codes.enum';
+import {
+  throwException,
+  throwSessionException,
+  throwCredentialsException,
+} from 'src/responseStatus';
+
+// Exception methods use enums internally (automatically handled)
+throwException.Usernotfound(); // Uses AuthResponseCode.USER_NOT_FOUND = 610
+throwSessionException.SessionNotFound(); // Uses SessionResponseCode.SESSION_NOT_FOUND = 702
+throwCredentialsException.CredentialsAlreadyExist(); // Uses CredentialsResponseCode.CREDENTIALS_ALREADY_EXIST = 801
 ```
 
-Returns structured: `{ statusCode, responseCode, ...additionalData }`. Add new exceptions in `responseStatus/` files, not inline.
+Response structure: `{ statusCode: number, responseCode: number, ...additionalData }`. Enum values organized by category:
+
+- **600s** (Auth): User authentication & account operations
+- **700s** (Sessions): Session management
+- **800s** (Credentials): External service credential storage
+- **870s** (Validation): Input validation errors (via CustomValidationPipe)
+- **900s** (Profile): User profile & settings operations
+
+Add new exceptions in `responseStatus/` files only. Always use enum values, never hardcode numeric codes. Reference: [docs/backend/response-codes.md](../../docs/backend/response-codes.md)
 
 ### Session Management
 

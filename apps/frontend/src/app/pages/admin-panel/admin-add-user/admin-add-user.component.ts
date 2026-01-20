@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { AdminPanelService } from '../admin-panel.service';
 import { ToastrService } from 'ngx-toastr';
+import { RESPONSE_CODES } from '../../../config/response-codes.const';
 
 @Component({
   selector: 'app-admin-add-user',
@@ -42,7 +43,7 @@ export class AdminAddUserComponent {
       this.toastr.success(`User "${response.userName}" created successfully`);
       return;
     }
-    if (response.responseCode === '607') {
+    if (response.responseCode === RESPONSE_CODES.AUTH.USERNAME_ALREADY_USED) {
       this.toastr.error('Username already exists');
     }
   }

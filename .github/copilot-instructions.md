@@ -31,7 +31,7 @@ User Login → Frontend (fetch to /login) → Backend validates Passport.js
 
 ## Backend (NestJS)
 
-When working on backend code, refer to [apps/backend/.github/copilot-instructions.md](apps/backend/.github/copilot-instructions.md).
+When working on backend code, refer to [apps/backend/.github/copilot-instructions.md].
 
 **Key Files**: [apps/backend/src](apps/backend/src)
 
@@ -72,17 +72,30 @@ Files: [src/auth/guards/service.access.guard.ts](apps/backend/src/auth/guards/se
 ### Error Handling
 
 ```typescript
-// DO: Use response utils
+// DO: Use response enums
+import {
+  AuthResponseCode,
+  SessionResponseCode,
+  CredentialsResponseCode,
+} from "src/responseStatus/response-codes.enum";
 import {
   throwException,
   throwSessionException,
-} from "src/responseStatus/response.utils";
+  throwCredentialsException,
+} from "src/responseStatus";
 
-throwException.Usernotfound();
+throwException.Usernotfound(); // Uses AuthResponseCode.USER_NOT_FOUND = 610
 // Returns: { statusCode: 404, responseCode: 610 }
 ```
 
-Response codes: 600s (auth), 700s (sessions), 800s (credentials).  
+Response codes are **organized by category** and defined via TypeScript enums in [apps/backend/src/responseStatus/response-codes.enum.ts](apps/backend/src/responseStatus/response-codes.enum.ts):
+
+- **600s** (Auth): User authentication & account operations
+- **700s** (Sessions): Session management
+- **800s** (Credentials): External service credential storage
+- **870s** (Validation): Input validation errors
+- **900s** (Profile): User profile & settings operations
+
 Reference: [docs/backend/response-codes.md](docs/backend/response-codes.md)
 
 ### Session Management
@@ -136,17 +149,21 @@ npm run build
 
 ### Session & Auth Pattern
 
-- **Session check**: Fetch to `/sessions/issessionactive` (response code `704` = active)
+- **Session check**: Fetch to `/sessions/issessionactive` (response code `RESPONSE_CODES.SESSIONS.SESSION_STATUS_FETCHED_SUCCESSFULLY` = active)
 - **Guards**: `authGuard` (redirect `/login`), `adminGuard` (redirect `/home`)
 - **Auth service**: [src/app/services/auth.service.ts](apps/frontend/src/app/services/auth.service.ts)—validates session via fetch, NOT HttpClient
 - **Credentials**: `credentials: 'include'` in all fetch calls for cookies
+- **Response codes**: Import from [apps/frontend/src/app/config/response-codes.const.ts](apps/frontend/src/app/config/response-codes.const.ts) - Never use hardcoded numeric values
 
 ### API Communication
 
 - **Fetch-based** (not HttpClient) for auth operations
 - Environment: Dev uses `api.lunatria.test`, prod uses `api.lunatria.com`
 - Proxy config routes `/` → `http://lunatria.com` in dev
-- Response codes: 609 (login success), 704 (session active), 702 (not found)
+- **Response codes**: Use constants from [apps/frontend/src/app/config/response-codes.const.ts](apps/frontend/src/app/config/response-codes.const.ts)
+  - `RESPONSE_CODES.AUTH.USER_LOGGED_IN` (609 - login success)
+  - `RESPONSE_CODES.SESSIONS.SESSION_STATUS_FETCHED_SUCCESSFULLY` (704 - session active)
+  - `RESPONSE_CODES.SESSIONS.SESSION_NOT_FOUND` (702 - not found)
 
 ### Component Architecture
 
@@ -165,13 +182,15 @@ npm run build
 
 ```typescript
 // Use fetch with credentials for API calls
+import { RESPONSE_CODES } from 'src/app/config/response-codes.const';
+
 async methodName(): Promise<boolean> {
   try {
     const response = await fetch(`${environment.apiBaseUrl}/endpoint`, {
       credentials: 'include',
     });
     const data = await response.json();
-    return data.responseCode === EXPECTED_CODE;
+    return data.responseCode === RESPONSE_CODES.AUTH.USER_LOGGED_IN; // Use constants!
   } catch (error) {
     console.error('Error:', error);
     return false;
@@ -283,11 +302,12 @@ npm test --workspace=apps/frontend
 
 1. **Credentials**: Use `CredentialsService` only; never read/write MongoDB directly
 2. **Constants**: Import from `src/config/constants/`; don't hardcode paths
-3. **Session**: Passport stores only `userId`; load full user via `UsersService` when needed
-4. **Encryption Key**: Must be exactly 32 chars; change breaks all stored credentials
-5. **Domain Cookies**: Requires `sameSite: 'none'` + HTTPS for cross-subdomain SSO
-6. **Response Codes**: Always use semantic codes (6xx/7xx/8xx); HTTP status alone insufficient for frontend
-7. **Environment**: Separate internal (`*_BASE_URL`) from public (`*_PUBLIC_URL`) service URLs
+3. **Response Codes**: Use enums/constants from [apps/backend/src/responseStatus/response-codes.enum.ts](apps/backend/src/responseStatus/response-codes.enum.ts) (backend) or [apps/frontend/src/app/config/response-codes.const.ts](apps/frontend/src/app/config/response-codes.const.ts) (frontend) - Never hardcode numeric values
+4. **Session**: Passport stores only `userId`; load full user via `UsersService` when needed
+5. **Encryption Key**: Must be exactly 32 chars; change breaks all stored credentials
+6. **Domain Cookies**: Requires `sameSite: 'none'` + HTTPS for cross-subdomain SSO
+7. **Response Structure**: Always return/throw structured responses with both `statusCode` (HTTP) and `responseCode` (application); HTTP status alone insufficient
+8. **Environment**: Separate internal (`*_BASE_URL`) from public (`*_PUBLIC_URL`) service URLs
 
 ---
 

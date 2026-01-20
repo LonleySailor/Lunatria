@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { environment } from '../../environments/environment';
 import { ApiService } from './api.service';
 import { API_ENDPOINTS } from '../config/constants';
+import { RESPONSE_CODES } from '../config/response-codes.const';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +12,7 @@ export class AuthService {
   async isUserLoggedIn(): Promise<boolean> {
     try {
       const data = await this.api.get<any>(API_ENDPOINTS.SESSIONS.IS_ACTIVE);
-      return data.responseCode === 704;
+      return data.responseCode === RESPONSE_CODES.SESSIONS.SESSION_STATUS_FETCHED_SUCCESSFULLY;
     } catch (error) {
       console.error('Error checking session:', error);
       return false;
@@ -22,7 +22,7 @@ export class AuthService {
   logout(): void {
     this.api.get<any>(API_ENDPOINTS.USERS.LOGOUT)
       .then(data => {
-        if (data && data.statusCode === 200 && data.responseCode === 611) {
+        if (data && data.statusCode === 200 && data.responseCode === RESPONSE_CODES.AUTH.USER_LOGGED_OUT_SUCCESSFULLY) {
           window.location.reload();
         }
       })
