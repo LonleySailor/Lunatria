@@ -2,12 +2,14 @@ import { throwSessionException } from 'src/responseStatus/sessions.response';
 import { SessionsService } from 'src/sessions/sessions.service';
 import { AuthenticatedGuard } from 'src/auth/guards/authenticated.guard';
 import { Controller, UseGuards, Get, Request } from '@nestjs/common';
-@Controller('sessions')
-export class SesssionController {
+import { AUTH_CONSTANTS } from 'src/config/constants';
+
+@Controller(AUTH_CONSTANTS.CONTROLLERS.SESSIONS)
+export class SessionController {
   constructor(private readonly sessionService: SessionsService) {}
 
   @UseGuards(AuthenticatedGuard)
-  @Get('getallsessions')
+  @Get(AUTH_CONSTANTS.ENDPOINTS.GET_ALL_SESSIONS)
   async getAllSessions(@Request() req) {
     const sessions = await this.sessionService.getSessions(
       req.session.passport.user,
@@ -15,7 +17,7 @@ export class SesssionController {
     throwSessionException.AllSessionsFetchedSuccessfully(sessions);
   }
 
-  @Get('issessionactive')
+  @Get(AUTH_CONSTANTS.ENDPOINTS.CHECK_SESSION_ACTIVE)
   async checkIfSessionIsActive(@Request() req) {
     const isSessionActive = await this.sessionService.checkIfSessionIsActive(
       req.session.id,
@@ -26,7 +28,7 @@ export class SesssionController {
     throwSessionException.SessionNotFound();
   }
 
-  @Get('getuserinfo')
+  @Get(AUTH_CONSTANTS.ENDPOINTS.GET_USER_INFO)
   async getUserInfo(@Request() req) {
     const user = await this.sessionService.getUserInfo(
       req.session.passport.user,

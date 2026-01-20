@@ -18,22 +18,26 @@ import { AuthenticatedGuard } from 'src/auth/guards/authenticated.guard';
 import { LocalAuthGuard } from 'src/auth/guards/local.auth.guard';
 import { Response } from 'express';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
-import { HttpService } from '@nestjs/axios';
 import Redis from 'ioredis';
+import { ConfigService } from 'src/config/config.service';
+import { APP_CONSTANTS, AUTH_CONSTANTS, SERVICES_CONSTANTS } from 'src/config/constants';
+import { Inject } from '@nestjs/common';
+import { REDIS_CLIENT } from 'src/redis/redis.module';
 
-@Controller('users')
+@Controller(AUTH_CONSTANTS.CONTROLLERS.USERS)
 export class UsersController {
   private readonly redis: Redis;
 
   constructor(
     private readonly usersService: UsersService,
     private readonly sessionService: SessionsService,
-    private httpService: HttpService,
+    @Inject(REDIS_CLIENT) redis: Redis,
+    private readonly configService: ConfigService,
   ) {
-    this.redis = new Redis(process.env.REDIS_URL);
+    this.redis = redis;
   }
   @UseGuards(AdminGuard)
-  @Post('/register')
+  @Post(AUTH_CONSTANTS.ENDPOINTS.REGISTER)
   async addUser(
     @Body('password') userPassword: string,
     @Body('username') userName: string,
@@ -44,8 +48,7 @@ export class UsersController {
     if (await this.usersService.checkUniqueness('username', userName)) {
       throwException.UsernameAlreadyUsed();
     }
-    const saltOrRounds = 10;
-    const hashedPassword = await bcrypt.hash(userPassword, saltOrRounds);
+    const hashedPassword = await bcrypt.hash(userPassword, AUTH_CONSTANTS.BCRYPT_ROUNDS);
     const result = await this.usersService.insertUser(
       userName,
       hashedPassword,
@@ -60,12 +63,12 @@ export class UsersController {
   }
 
   @UseGuards(LocalAuthGuard)
-  @Post('/login')
+  @Post(AUTH_CONSTANTS.ENDPOINTS.LOGIN)
   async login(
     @Request() req,
-    @Body('username') userName: string,
+    @Body('username') username: string,
   ): Promise<any> {
-    const user = await this.usersService.getUser(userName);
+    const user = await this.usersService.getUser(username);
     const userId = req.session.passport.user; // Passport sets this after login
     const sessionId = req.session.id; // Get the session ID from Express session
 
@@ -79,16 +82,16 @@ export class UsersController {
     throwException.UserloggedIn(data);
   }
 
-  @Get('/logout')
+  @Get(AUTH_CONSTANTS.ENDPOINTS.LOGOUT)
   async logout(@Req() req: any, @Res() res: Response): Promise<any> {
     return new Promise((resolve, reject) => {
       req.session.destroy((err) => {
         if (err) {
           reject(err);
-        } else {
-          const domain = process.env.DOMAIN;
+        } else {this.configService.getDomainName();
+          const domain = this.configService.getDomainName();
           res
-            .clearCookie('LunatriaSession', {
+            .clearCookie(APP_CONSTANTS.SESSION_NAME, {
               domain: domain,
               path: '/',
             })
@@ -99,7 +102,8 @@ export class UsersController {
       });
     });
   }
-  @Get('logout-jellyfin')
+
+  @Get(AUTH_CONSTANTS.ENDPOINTS.LOGOUT_JELLYFIN)
   async logoutJellyfin(@Req() req: any, @Res() res: Response): Promise<any> {
     const userId = req.session.passport.user;
     const redisKey = `jellyfin:token:${userId}`;
@@ -111,13 +115,13 @@ export class UsersController {
         if (err) {
           reject(err);
         } else {
-          const domain = process.env.DOMAIN;
+          const domain = this.configService.getDomainName();
           res
-            .clearCookie('jellyfin_auth', {
-              domain: domain, // note the dot for subdomain-wide
-              path: '/',
-              secure: true,
-              sameSite: 'none',
+            .clearCookie(SERVICES_CONSTANTS.COOKIES.JELLYFIN, {
+              domain: domain,
+              path: SERVICES_CONSTANTS.COOKIES.PATH,
+              secure: SERVICES_CONSTANTS.COOKIES.SECURE,
+              sameSite: SERVICES_CONSTANTS.COOKIES.SAME_SITE_NONE,
             })
             .status(200)
             .json({ message: 'Logged out' });
@@ -127,42 +131,20 @@ export class UsersController {
     });
   }
 
-  @Get('logout-radarr')
+  @Get(AUTH_CONSTANTS.ENDPOINTS.LOGOUT_RADARR)
   async logoutRadarr(@Req() req: any, @Res() res: Response): Promise<any> {
     return new Promise((resolve, reject) => {
       req.session.destroy((err) => {
         if (err) {
           reject(err);
         } else {
-          const domain = process.env.DOMAIN;
+          const domain = this.configService.getDomainName();
           res
-            .clearCookie('radarr_auth', {
-              domain: domain, // note the dot for subdomain-wide
-              path: '/',
-              secure: true,
-              sameSite: 'none',
-            })
-            .status(200)
-            .json({ message: 'Logged out' });
-          resolve(null);
-        }
-      });
-    });
-  }
-  @Get('logout-sonarr')
-  async logoutSonarr(@Req() req: any, @Res() res: Response): Promise<any> {
-    return new Promise((resolve, reject) => {
-      req.session.destroy((err) => {
-        if (err) {
-          reject(err);
-        } else {
-          const domain = process.env.DOMAIN;
-          res
-            .clearCookie('sonarr_auth', {
-              domain: domain, // note the dot for subdomain-wide
-              path: '/',
-              secure: true,
-              sameSite: 'none',
+            .clearCookie(SERVICES_CONSTANTS.COOKIES.RADARR, {
+              domain: domain,
+              path: SERVICES_CONSTANTS.COOKIES.PATH,
+              secure: SERVICES_CONSTANTS.COOKIES.SECURE,
+              sameSite: SERVICES_CONSTANTS.COOKIES.SAME_SITE_NONE,
             })
             .status(200)
             .json({ message: 'Logged out' });
@@ -172,12 +154,35 @@ export class UsersController {
     });
   }
 
-  @Delete('delete-user')
+  @Get(AUTH_CONSTANTS.ENDPOINTS.LOGOUT_SONARR)
+  async logoutSonarr(@Req() req: any, @Res() res: Response): Promise<any> {
+    return new Promise((resolve, reject) => {
+      req.session.destroy((err) => {
+        if (err) {
+          reject(err);
+        } else {
+          const domain = this.configService.getDomainName();
+          res
+            .clearCookie(SERVICES_CONSTANTS.COOKIES.SONARR, {
+              domain: domain,
+              path: SERVICES_CONSTANTS.COOKIES.PATH,
+              secure: SERVICES_CONSTANTS.COOKIES.SECURE,
+              sameSite: SERVICES_CONSTANTS.COOKIES.SAME_SITE_NONE,
+            })
+            .status(200)
+            .json({ message: 'Logged out' });
+          resolve(null);
+        }
+      });
+    });
+  }
+
+  @Delete(AUTH_CONSTANTS.ENDPOINTS.DELETE_USER)
   async deleteUser(
-    @Body('userName') userName: string,
+    @Body('username') username: string,
     @Body('password') password: string,
   ) {
-    const user = await this.usersService.getUser(userName);
+    const user = await this.usersService.getUser(username);
     if (!user) {
       throwException.Usernotfound();
     }
@@ -190,14 +195,14 @@ export class UsersController {
   }
 
   @UseGuards(AuthenticatedGuard)
-  @Delete('destroyallsessions')
+  @Delete(AUTH_CONSTANTS.ENDPOINTS.DESTROY_ALL_SESSIONS)
   async destroyAllSessions(@Request() req) {
     await this.sessionService.deleteAllSessions(req.session.passport.user);
     throwSessionException.AllSessionsDestroyedSuccessfully();
   }
 
   @UseGuards(AuthenticatedGuard)
-  @Get('getallsessions')
+  @Get(AUTH_CONSTANTS.ENDPOINTS.GET_ALL_SESSIONS)
   async getAllSessions(@Request() req) {
     const sessions = await this.sessionService.getSessions(
       req.session.passport.user,

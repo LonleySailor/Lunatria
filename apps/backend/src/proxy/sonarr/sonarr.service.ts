@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import Redis from 'ioredis';
 import axios from 'axios';
 import { AuditService } from 'src/audit/audit.service';
 import { CredentialsService } from 'src/credentials/credentials.service';
-import { HttpService } from '@nestjs/axios';
+import { REDIS_CLIENT } from 'src/redis/redis.module';
 
 @Injectable()
 export class SonarrService {
@@ -11,11 +11,18 @@ export class SonarrService {
   private readonly redis: Redis;
 
   constructor(
-    private readonly http: HttpService,
     private readonly credentialsService: CredentialsService,
     private readonly auditService: AuditService,
+    @Inject(REDIS_CLIENT) redis: Redis,
   ) {
-    this.redis = new Redis(process.env.REDIS_URL);
+    this.redis = redis;
+  }
+
+  getBaseUrl(): string {
+    if (!this.sonarrUrl) {
+      throw new Error('SONARR_BASE_URL is not configured');
+    }
+    return this.sonarrUrl;
   }
 
   async getSonarrCookie(userId: string): Promise<string> {
@@ -38,7 +45,7 @@ export class SonarrService {
 
     try {
       const res = await axios.post(
-        `${this.sonarrUrl}/login`,
+        `${this.getBaseUrl()}/login`,
         new URLSearchParams({
           username: creds.username,
           password: creds.password,

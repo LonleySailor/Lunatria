@@ -3,45 +3,51 @@ import { Response } from 'express';
 import { SonarrService } from './sonarr.service';
 import { Service } from 'src/auth/decorators/service.decorator';
 import { ServiceAccessGuard } from 'src/auth/guards/service.access.guard';
+import { SERVICES_CONSTANTS } from 'src/config/constants';
+import { ConfigService } from 'src/config/config.service';
 
-@Controller('/sonarr')
+@Controller(SERVICES_CONSTANTS.SONARR.ROUTE)
 export class SonarrController {
-  constructor(private readonly sonarrService: SonarrService) { }
+  constructor(
+    private readonly sonarrService: SonarrService,
+    private readonly configService: ConfigService,
+  ) {}
 
-  @Service('sonarr')
+  @Service(SERVICES_CONSTANTS.SERVICES.SONARR)
   @UseGuards(ServiceAccessGuard)
   @All('*')
   async proxy(@Req() req: any, @Res() res: Response) {
     const userId = req.session.passport.user;
+    const domainName = this.configService.getDomainName();
+    const cookieMaxAge = this.configService.getServiceCookieMaxAge();
+    const sonarrPublicUrl = this.configService.getSonarrPublicUrl();
 
-    if (!req.cookies.sonarr_auth) {
+    if (!req.cookies[SERVICES_CONSTANTS.COOKIES.SONARR]) {
       const sonarrCookie = await this.sonarrService.getSonarrCookie(userId);
 
-      res.cookie('sonarr_auth', 'true', {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'none',
-        maxAge: 1000 * 60 * 60 * 24,
-        domain: '.lunatria.com',
-        path: '/',
+      res.cookie(SERVICES_CONSTANTS.COOKIES.SONARR, 'true', {
+        httpOnly: SERVICES_CONSTANTS.COOKIES.HTTP_ONLY,
+        secure: SERVICES_CONSTANTS.COOKIES.SECURE,
+        sameSite: SERVICES_CONSTANTS.COOKIES.SAME_SITE_NONE,
+        maxAge: cookieMaxAge,
+        domain: `.${domainName}`,
+        path: SERVICES_CONSTANTS.COOKIES.PATH,
       });
 
-      // Forward actual sonarrAuth to browser
+      // Forward actual SonarrAuth to browser
       const [cookieName, cookieValue] = sonarrCookie.split(';')[0].split('=');
       res.cookie(cookieName, cookieValue, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'lax', // ← match sonarr's default
-        path: '/', // ← already correct
-        // DO NOT set domain → this makes it HostOnly=true
-        maxAge: 1000 * 60 * 60 * 24,
+        httpOnly: SERVICES_CONSTANTS.COOKIES.HTTP_ONLY,
+        secure: SERVICES_CONSTANTS.COOKIES.SECURE,
+        sameSite: SERVICES_CONSTANTS.COOKIES.SAME_SITE_LAX,
+        path: SERVICES_CONSTANTS.COOKIES.PATH,
+        maxAge: cookieMaxAge,
       });
 
-      // Redirect to sonarr domain, now authorized
-      return res.redirect('https://sonarr.lunatria.com');
+      // Redirect to Sonarr domain, now authorized
+      return res.redirect(sonarrPublicUrl);
     }
 
-    // Optionally you can add fallback logic here
-    return res.redirect('https://sonarr.lunatria.com');
+    return res.redirect(sonarrPublicUrl);
   }
 }

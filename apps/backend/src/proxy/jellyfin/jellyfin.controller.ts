@@ -3,35 +3,41 @@ import { Response } from 'express';
 import { ServiceAccessGuard } from 'src/auth/guards/service.access.guard';
 import { Service } from 'src/auth/decorators/service.decorator';
 import { JellyfinService } from './jellyfin.service';
-import { EventEmitter } from 'events';
+import { SERVICES_CONSTANTS } from 'src/config/constants';
+import { ConfigService } from 'src/config/config.service';
 
-EventEmitter.defaultMaxListeners = 5000;
-
-@Controller('/jellyfin')
+@Controller(SERVICES_CONSTANTS.JELLYFIN.ROUTE)
 export class JellyfinController {
-  constructor(private readonly jellyfinService: JellyfinService) { }
+  constructor(
+    private readonly jellyfinService: JellyfinService,
+    private readonly configService: ConfigService,
+  ) {}
 
-  @Service('jellyfin')
+  @Service(SERVICES_CONSTANTS.SERVICES.JELLYFIN)
   @UseGuards(ServiceAccessGuard)
   @All('*')
   async proxy(@Req() req: any, @Res() res: Response) {
     const userToAuthId = req.session.passport.user;
-    if (!req.cookies.jellyfin_auth) {
+    const domainName = this.configService.getDomainName();
+    const cookieMaxAge = this.configService.getServiceCookieMaxAge();
+    const jellyfinPublicUrl = this.configService.getJellyfinPublicUrl();
+
+    if (!req.cookies[SERVICES_CONSTANTS.COOKIES.JELLYFIN]) {
       const { accessToken, userId, serverId } =
         await this.jellyfinService.getJellyfinToken(userToAuthId);
 
-      res.cookie('jellyfin_auth', 'true', {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'none',
-        maxAge: 1000 * 60 * 60 * 24,
-        domain: '.lunatria.com',
-        path: '/',
+      res.cookie(SERVICES_CONSTANTS.COOKIES.JELLYFIN, 'true', {
+        httpOnly: SERVICES_CONSTANTS.COOKIES.HTTP_ONLY,
+        secure: SERVICES_CONSTANTS.COOKIES.SECURE,
+        sameSite: SERVICES_CONSTANTS.COOKIES.SAME_SITE_NONE,
+        maxAge: cookieMaxAge,
+        domain: `.${domainName}`,
+        path: SERVICES_CONSTANTS.COOKIES.PATH,
       });
 
       // Redirect to the SSO bridge with token
       res.redirect(
-        `https://jellyfin.lunatria.com/sso-bridge.html?token=${accessToken}&userId=${userId}&serverId=${serverId}`,
+        `${jellyfinPublicUrl}/sso-bridge.html?token=${accessToken}&userId=${userId}&serverId=${serverId}`,
       );
       return;
     }

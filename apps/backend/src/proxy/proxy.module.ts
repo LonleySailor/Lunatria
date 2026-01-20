@@ -12,6 +12,7 @@ import { RadarrService } from './radarr/radarr.service';
 import { AuditModule } from 'src/audit/audit.module';
 import { SonarrController } from './sonarr/sonarr.controller';
 import { SonarrService } from './sonarr/sonarr.service';
+import { ConfigModule } from 'src/config/config.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { SonarrService } from './sonarr/sonarr.service';
     UsersModule,
     CredentialsModule,
     AuditModule,
+    ConfigModule,
   ],
   controllers: [
     ProxyController,
@@ -29,4 +31,4 @@ import { SonarrService } from './sonarr/sonarr.service';
   ],
   providers: [ProxyService, JellyfinService, RadarrService, SonarrService],
 })
-export class ProxyModule { }
+export class ProxyModule {}

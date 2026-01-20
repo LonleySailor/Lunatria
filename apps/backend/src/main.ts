@@ -10,14 +10,20 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import * as express from 'express';
 import * as cookieParser from 'cookie-parser';
+import { ConfigService } from './config/config.service';
+import { APP_CONSTANTS } from './config/constants';
 
 dotenv.config();
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  const domain = process.env.DOMAIN;
+  const configService = app.get(ConfigService);
 
   // Create Redis client
-  const redis = new Redis(process.env.REDIS_URL || 'redis://127.0.0.1:6380');
+  const redis = new Redis(configService.getRedisUrl());
+
+  const domainName = configService.getDomainName();
+  const protocol = configService.getCorsProtocol();
+
   app.enableCors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true); // allow non-browser tools like curl
@@ -26,7 +32,11 @@ async function bootstrap() {
         const hostname = new URL(origin).hostname;
 
         // Allow both the root domain and any subdomain
-        if (hostname === 'lunatria.com' || hostname.endsWith('.lunatria.com')) {
+        if (
+          hostname === domainName ||
+          hostname.endsWith(`.${domainName}`) ||
+          hostname === 'localhost'
+        ) {
           return callback(null, true);
         }
       } catch (e) {
@@ -39,20 +49,21 @@ async function bootstrap() {
     credentials: true,
   });
 
-  app.set('trust proxy', true);
+  app.set('trust proxy', APP_CONSTANTS.TRUST_PROXY);
   app.use(
     session({
-      name: 'LunatriaSession',
+      name: APP_CONSTANTS.SESSION_NAME,
       store: new RedisStore({ client: redis }),
-      secret: process.env.PASSPORT_SECRET,
+      secret: configService.getPassportSecret(),
       resave: false,
       saveUninitialized: false,
       cookie: {
         httpOnly: true,
-        secure: true, // REQUIRED for SameSite=None
+        secure: protocol === 'https', // REQUIRED for SameSite=None in production
         sameSite: 'none', // Allow cross-site cookies
-        domain: domain, // Allows cookies across subdomains
+        domain: domainName, // Allows cookies across subdomains
         path: '/',
+        maxAge: configService.getSessionCookieMaxAge(),
       },
     }),
   );
@@ -67,6 +78,8 @@ async function bootstrap() {
   // Persist sessions across restarts
   await app.use(passport.session());
 
-  await app.listen(3000);
+  const port = configService.getPort();
+  await app.listen(port);
+  console.log(`${APP_CONSTANTS.APP_NAME} running on port ${port}`);
 }
 bootstrap();

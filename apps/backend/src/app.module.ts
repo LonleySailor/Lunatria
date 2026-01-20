@@ -7,10 +7,21 @@ import { SessionMiddleware } from './sessions/sessions.middleware';
 import { ProxyModule } from './proxy/proxy.module';
 import { CredentialsModule } from './credentials/credentials.module';
 import { SupportModule } from './support/support.module';
+import { RedisModule } from './redis/redis.module';
+import { ConfigModule } from './config/config.module';
+import { ConfigService } from './config/config.service';
 
 @Module({
   imports: [
-    MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost:27018/nest'),
+    ConfigModule,
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        uri: configService.getMongodbUri(),
+      }),
+    }),
+    RedisModule,
     UsersModule,
     AuthModule,
     SessionsModule,

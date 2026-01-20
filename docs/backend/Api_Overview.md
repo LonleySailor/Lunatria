@@ -13,6 +13,23 @@
 
 ---
 
+### Detailed Backend Docs Index
+- Constants: see [docs/backend/constants.md](constants.md)
+- Environment: see [docs/backend/environment.md](environment.md)
+- Modules & Endpoints:
+  - Users: see [docs/backend/modules/users.md](modules/users.md)
+  - Sessions: see [docs/backend/modules/sessions.md](modules/sessions.md)
+  - Credentials: see [docs/backend/modules/credentials.md](modules/credentials.md)
+  - Proxy (Jellyfin/Radarr/Sonarr): see [docs/backend/modules/proxy.md](modules/proxy.md)
+  - Support: see [docs/backend/modules/support.md](modules/support.md)
+  - Audit: see [docs/backend/modules/audit.md](modules/audit.md)
+  - Config Service: see [docs/backend/modules/config.md](modules/config.md)
+- Response Codes: see [docs/backend/response-codes.md](response-codes.md)
+- Scripts: see [docs/backend/scripts.md](scripts.md)
+- Migrations: see [docs/backend/migrations.md](migrations.md)
+
+---
+
 ## Project Overview
 
 Lunatria Server is a NestJS-based authentication proxy service that provides secure Single Sign-On (SSO) access to media services including Jellyfin, Radarr, and Sonarr. It acts as a centralized gateway with user management, credential encryption, session management, and comprehensive audit logging.
@@ -74,7 +91,7 @@ graph TB
 
 ### Base URL
 ```
-Production: https://auth.lunatria.com
+Production: https://api.lunatria.com
 Development: http://localhost:3000
 ```
 
@@ -128,7 +145,7 @@ Authenticate user and create session.
 ```
 
 **Error Codes:**
-- `602` (401): Incorrect email/username
+- `602` (401): Incorrect username
 - `603` (401): Incorrect password
 - `610` (404): User not found
 
@@ -205,7 +222,7 @@ Delete user account (self-deletion).
 **Request Body:**
 ```json
 {
-  "userName": "string",
+  "username": "string",
   "password": "string"
 }
 ```

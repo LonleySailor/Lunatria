@@ -54,6 +54,39 @@ export class OptimizedComponent {
 ```
 
 ### Service Design
+#### Constants-Driven API Endpoints
+
+Avoid hardcoding API paths in services or components. Define them centrally and import where needed:
+
+```typescript
+// apps/frontend/src/app/config/constants.ts
+export const API_ENDPOINTS = {
+  USERS: { LOGIN: '/users/login', LOGOUT: '/users/logout', REGISTER: '/users/register' },
+  SESSIONS: { IS_ACTIVE: '/sessions/issessionactive' },
+  SUPPORT: { IS_ADMIN: '/support/is-admin' },
+};
+```
+
+```typescript
+// apps/frontend/src/app/services/auth.service.ts
+const res = await this.api.get(API_ENDPOINTS.SESSIONS.IS_ACTIVE);
+```
+
+#### Centralized API Wrapper
+
+Use a lightweight `ApiService` wrapper over `fetch` to ensure consistent cookie handling, error parsing, and JSON responses.
+
+```typescript
+await this.api.post(API_ENDPOINTS.USERS.LOGIN, { username, password });
+```
+
+### Testing Practices
+
+1. Mock `ApiService` in unit tests to isolate business logic.
+2. For pure `fetch` usage, mock `global.fetch` and restore after each test.
+3. Validate both success and error branches for critical flows (auth, admin, status).
+4. Prefer small, focused tests per service and component.
+
 
 #### Injectable Services
 

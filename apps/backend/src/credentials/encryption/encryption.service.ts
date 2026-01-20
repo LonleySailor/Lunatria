@@ -1,13 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import * as crypto from 'crypto';
+import { AUTH_CONSTANTS } from 'src/config/constants';
 
 @Injectable()
 export class EncryptionService {
-  private readonly algorithm = 'aes-256-cbc';
+  private readonly algorithm = AUTH_CONSTANTS.ENCRYPTION.ALGORITHM;
   private readonly key: Buffer;
 
   constructor() {
     const secret = process.env.CREDENTIAL_ENCRYPTION_KEY;
+    console.log('Encryption key length:', secret?.length);
     if (!secret || secret.length !== 32) {
       throw new Error('CREDENTIAL_ENCRYPTION_KEY must be 32 characters long');
     }

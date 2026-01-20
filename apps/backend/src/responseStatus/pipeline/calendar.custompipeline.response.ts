@@ -3,27 +3,16 @@ import {
   ValidationPipe,
   ValidationError,
 } from '@nestjs/common';
-
-const ERROR_CODES: Record<string, number> = {
-  isNotEmpty: 871,
-  isString: 872,
-  isDate: 873,
-  validateIf: 874,
-  typeError: 875,
-  invalidRRule: 876,
-  isBoolean: 877,
-  isNumber: 878,
-  isArray: 879,
-};
+import { ValidationErrorCode, VALIDATION_ERROR_CODE_MAP } from '../response-codes.enum';
 
 export const CustomValidationPipe = new ValidationPipe({
   exceptionFactory: (errors: ValidationError[]) => {
     return new BadRequestException({
       statusCode: 400,
-      code: 870,
+      code: ValidationErrorCode.VALIDATION_ERROR_BASE,
       errors: errors.map((err) => ({
         field: err.property,
-        code: ERROR_CODES[Object.keys(err.constraints || {})[0]] || 999, // Default to 999 if not mapped
+        code: VALIDATION_ERROR_CODE_MAP[Object.keys(err.constraints || {})[0]] || 999, // Default to 999 if not mapped
         issues: Object.values(err.constraints || {}), // Actual error messages
       })),
     });

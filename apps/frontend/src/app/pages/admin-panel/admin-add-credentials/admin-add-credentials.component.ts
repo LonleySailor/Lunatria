@@ -3,6 +3,7 @@ import { AdminPanelService } from '../admin-panel.service';
 import { ToastrService } from 'ngx-toastr';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { RESPONSE_CODES } from '../../../config/response-codes.const';
 
 @Component({
   selector: 'app-admin-add-credentials',
@@ -49,9 +50,9 @@ export class AdminAddCredentialsComponent {
 
     const response = await this.adminService.addCredentials(payload)
 
-    if (response.responseCode === "610") {
+    if (response.responseCode === RESPONSE_CODES.AUTH.USER_NOT_FOUND) {
       this.toastr.error('Target user not found.');
-    } if (response.responseCode === "801") {
+    } else if (response.responseCode === RESPONSE_CODES.CREDENTIALS.CREDENTIALS_ALREADY_EXIST) {
       this.toastr.error('Service not found.');
     }
     else {

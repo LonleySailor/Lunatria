@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, of, BehaviorSubject } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { Observable, of, BehaviorSubject, from } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { ApiService } from './api.service';
+import { API_ENDPOINTS } from '../config/constants';
 
 type ServiceName = 'hoarder' | 'nextcloud' | 'vaultwarden' | 'jellyfin' | 'radarr' | 'sonarr' | 'komga';
 
@@ -10,7 +11,7 @@ type ServiceName = 'hoarder' | 'nextcloud' | 'vaultwarden' | 'jellyfin' | 'radar
   providedIn: 'root'
 })
 export class StatusService {
-  private readonly apiUrl = `${environment.apiBaseUrl}/support/services`;
+  private readonly apiUrl = `${environment.apiBaseUrl}${API_ENDPOINTS.SUPPORT.SERVICES}`;
   private lastKnownStatuses = new BehaviorSubject<Record<ServiceName, boolean>>({
     hoarder: false,
     nextcloud: false,
@@ -21,18 +22,12 @@ export class StatusService {
     komga: false
   });
 
-  constructor(private http: HttpClient) { }
+  constructor(private api: ApiService) { }
 
   getAllServiceStatuses(): Observable<Record<ServiceName, boolean>> {
-    return this.http.get<Record<ServiceName, boolean>>(this.apiUrl).pipe(
-      tap(statuses => {
-        this.lastKnownStatuses.next(statuses);
-      }),
-      catchError((error: HttpErrorResponse) => {
-        console.error('Error fetching service statuses:', error.message);
-        console.log('Returning last known statuses:', this.lastKnownStatuses.value);
-        return of(this.lastKnownStatuses.value);
-      })
+    return from(this.api.get<Record<ServiceName, boolean>>(API_ENDPOINTS.SUPPORT.SERVICES)).pipe(
+      tap((statuses) => this.lastKnownStatuses.next(statuses)),
+      catchError(() => of(this.lastKnownStatuses.value))
     );
   }
 } 

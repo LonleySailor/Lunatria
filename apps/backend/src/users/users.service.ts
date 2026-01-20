@@ -2,11 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { user, userDocument } from './users.schema';
+import { DATABASE_CONSTANTS } from 'src/config/constants';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectModel(user.name) private readonly userModel: Model<userDocument>,
+    @InjectModel(DATABASE_CONSTANTS.SCHEMAS.USER) private readonly userModel: Model<userDocument>,
   ) { }
 
   async deleteUser(user: user) {

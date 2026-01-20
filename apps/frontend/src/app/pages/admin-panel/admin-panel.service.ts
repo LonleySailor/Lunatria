@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { ApiService } from '../../services/api.service';
+import { API_ENDPOINTS } from '../../config/constants';
 
 @Injectable({ providedIn: 'root' })
 export class AdminPanelService {
 
-  constructor(private http: HttpClient) { }
+  constructor(private api: ApiService) { }
 
   async createUser(userData: {
     username: string;
@@ -16,21 +16,13 @@ export class AdminPanelService {
     allowedServices: string[];
   }) {
 
-    return fetch(`${environment.apiBaseUrl}/users/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include',
-      body: JSON.stringify({
-        username: userData.username,
-        password: userData.password,
-        email: userData.email,
-        usertype: userData.usertype,
-        allowedServices: userData.allowedServices,
-      })
-    })
-      .then(response => response.json());
+    return this.api.post(API_ENDPOINTS.USERS.REGISTER, {
+      username: userData.username,
+      password: userData.password,
+      email: userData.email,
+      usertype: userData.usertype,
+      allowedServices: userData.allowedServices,
+    });
   }
 
   async addCredentials(credentialsData: {
@@ -54,14 +46,6 @@ export class AdminPanelService {
       payload.email = credentialsData.email;
     }
 
-    return await fetch(`${environment.apiBaseUrl}/credentials/add`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include',
-      body: JSON.stringify(payload)
-    })
-      .then(response => response.json());
+    return await this.api.post<any>(API_ENDPOINTS.CREDENTIALS.ADD, payload);
   }
 }
