@@ -12,7 +12,8 @@ export class SessionsService {
   private readonly redis: Redis;
 
   constructor(
-    @InjectModel(DATABASE_CONSTANTS.SCHEMAS.USER) private userModel: Model<user>,
+    @InjectModel(DATABASE_CONSTANTS.SCHEMAS.USER)
+    private userModel: Model<user>,
     @Inject(REDIS_CLIENT) redis: Redis,
   ) {
     this.redis = redis;
@@ -76,7 +77,7 @@ export class SessionsService {
   async getUserInfo(user: string) {
     const userInfo = await this.getUser(user);
     const responseData = {
-      username: userInfo.username,
+      username: userInfo?.username,
     };
     return responseData;
   }
@@ -94,11 +95,11 @@ export class SessionsService {
       throwSessionException.SessionNotFound();
     }
     try {
-      await sessionRequest.passport.user;
+      await sessionRequest?.passport?.user;
     } catch {
       throwSessionException.SessionNotFound();
     }
-    const userId = sessionRequest.passport.user;
+    const userId = sessionRequest?.passport?.user;
 
     const sessionValidity = await this.checkIfSessionIsValid(sessionId, userId);
     if (!sessionValidity) {

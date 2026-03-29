@@ -7,12 +7,13 @@ import { DATABASE_CONSTANTS } from 'src/config/constants';
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectModel(DATABASE_CONSTANTS.SCHEMAS.USER) private readonly userModel: Model<userDocument>,
-  ) { }
+    @InjectModel(DATABASE_CONSTANTS.SCHEMAS.USER)
+    private readonly userModel: Model<userDocument>,
+  ) {}
 
   async deleteUser(user: user) {
     const userName = user.username;
-    await this.userModel.findOneAndDelete({ userName });
+    await this.userModel.findOneAndDelete({username: userName });
   }
   async insertUser(
     username: string,

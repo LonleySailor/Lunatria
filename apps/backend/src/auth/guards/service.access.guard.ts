@@ -10,7 +10,7 @@ export class ServiceAccessGuard implements CanActivate {
     private readonly sessionsService: SessionsService,
     private readonly userService: UsersService,
     private readonly reflector: Reflector,
-  ) { }
+  ) {}
 
   async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();

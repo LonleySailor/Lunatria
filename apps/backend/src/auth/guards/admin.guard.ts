@@ -8,7 +8,7 @@ export class AdminGuard implements CanActivate {
   constructor(
     private readonly sessionsService: SessionsService,
     private readonly userService: UsersService,
-  ) { }
+  ) {}
 
   async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
@@ -17,7 +17,7 @@ export class AdminGuard implements CanActivate {
     const user = await this.userService.getUserById(
       sessionRequest.passport.user,
     );
-    if (user.userType === 'admin') {
+    if (user?.userType === 'admin') {
       return true;
     }
     throwException.OnlyForAdmin();

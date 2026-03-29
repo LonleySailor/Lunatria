@@ -47,14 +47,11 @@ export class JellyfinService {
       'jellyfin',
     );
     try {
-      console.log(
-        `Attempting to authenticate with Jellyfin at ${this.jellyfinUrl}`,
-      );
       const res = await this.http.axiosRef.post(
         `${this.getBaseUrl()}/Users/AuthenticateByName`,
         {
-          Username: creds.username,
-          Pw: creds.password,
+          Username: creds?.username,
+          Pw: creds?.password,
         },
         {
           headers: {
@@ -90,7 +87,7 @@ export class JellyfinService {
         serverId,
         userId: jellyfinUserId,
       };
-      await this.redis.set(redisKey, JSON.stringify(dataToCache));
+      await this.redis.set(redisKey, JSON.stringify(dataToCache), 'EX', 86400);
       await this.auditService.log(
         userId,
         'jellyfin',

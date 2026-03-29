@@ -7,7 +7,7 @@
     "assets": [
       {
         "include": "../public/**/*",
-        "outDir": "./public",
+        "outDir": "dist/public",
         "watchAssets": true
       }
     ]

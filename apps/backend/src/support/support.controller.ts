@@ -6,9 +6,7 @@ import { AUTH_CONSTANTS } from 'src/config/constants';
 
 @Controller(AUTH_CONSTANTS.CONTROLLERS.SUPPORT)
 export class SupportController {
-  constructor(
-    private readonly supportService: SupportService,
-  ) { }
+  constructor(private readonly supportService: SupportService) {}
 
   @Get(AUTH_CONSTANTS.ENDPOINTS.SUPPORT_SERVICES)
   getServiceStatuses() {

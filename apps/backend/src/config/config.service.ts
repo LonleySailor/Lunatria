@@ -116,9 +116,7 @@ export class ConfigService {
       case SERVICES_CONSTANTS.SERVICES.VAULTWARDEN:
         return (
           process.env.VAULTWARDEN_PUBLIC_URL ||
-          this.buildServiceUrl(
-            DOMAIN_CONSTANTS.SERVICE_SUBDOMAINS.VAULTWARDEN,
-          )
+          this.buildServiceUrl(DOMAIN_CONSTANTS.SERVICE_SUBDOMAINS.VAULTWARDEN)
         );
       case SERVICES_CONSTANTS.SERVICES.KOMGA:
         return (
@@ -179,5 +177,4 @@ export class ConfigService {
     }
     return url;
   }
-
 }

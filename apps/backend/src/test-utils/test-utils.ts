@@ -128,14 +128,19 @@ export function wait(ms: number): Promise<void> {
 /**
  * Helper to test that a function throws a specific exception
  */
-export async function expectThrowException(fn: () => Promise<any>, expectedCode?: number) {
+export async function expectThrowException(
+  fn: () => Promise<any>,
+  expectedCode?: number,
+) {
   let thrown = false;
   try {
     await fn();
   } catch (error: any) {
     thrown = true;
     if (expectedCode) {
-      expect(error.response?.responseCode || error.responseCode).toBe(expectedCode);
+      expect(error.response?.responseCode || error.responseCode).toBe(
+        expectedCode,
+      );
     }
   }
   expect(thrown).toBe(true);
