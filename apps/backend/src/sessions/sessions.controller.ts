@@ -12,26 +12,26 @@ export class SessionController {
   @Get(AUTH_CONSTANTS.ENDPOINTS.GET_ALL_SESSIONS)
   async getAllSessions(@Request() req) {
     const sessions = await this.sessionService.getSessions(
-      req.session.passport.user,
+      req.session?.passport?.user,
     );
     throwSessionException.AllSessionsFetchedSuccessfully(sessions);
   }
-
+@UseGuards(AuthenticatedGuard)
   @Get(AUTH_CONSTANTS.ENDPOINTS.CHECK_SESSION_ACTIVE)
   async checkIfSessionIsActive(@Request() req) {
     const isSessionActive = await this.sessionService.checkIfSessionIsActive(
-      req.session.id,
+      req.session?.id,
     );
     if (isSessionActive) {
       throwSessionException.SessionStatusFetchedSuccessfully(true);
     }
     throwSessionException.SessionNotFound();
   }
-
+  @UseGuards(AuthenticatedGuard)
   @Get(AUTH_CONSTANTS.ENDPOINTS.GET_USER_INFO)
   async getUserInfo(@Request() req) {
     const user = await this.sessionService.getUserInfo(
-      req.session.passport.user,
+      req.session?.passport?.user,
     );
     throwSessionException.UserInfoFetchedSuccessfully(user);
   }

@@ -3,10 +3,7 @@ import { AuthResponseCode } from './response-codes.enum';
 
 class ThrowAuthExceptionClass {
   EmailNeedsVerification(): never {
-    throw createCustomException(
-      AuthResponseCode.EMAIL_NEEDS_VERIFICATION,
-      422,
-    );
+    throw createCustomException(AuthResponseCode.EMAIL_NEEDS_VERIFICATION, 422);
   }
 
   IncorrectEmail(): never {
@@ -18,11 +15,17 @@ class ThrowAuthExceptionClass {
   }
 
   InvalidVerificationCode(): never {
-    throw createCustomException(AuthResponseCode.INVALID_VERIFICATION_CODE, 401);
+    throw createCustomException(
+      AuthResponseCode.INVALID_VERIFICATION_CODE,
+      401,
+    );
   }
 
   EmailVerifiedSuccessfully(): never {
-    throw createCustomException(AuthResponseCode.EMAIL_VERIFIED_SUCCESSFULLY, 200);
+    throw createCustomException(
+      AuthResponseCode.EMAIL_VERIFIED_SUCCESSFULLY,
+      200,
+    );
   }
 
   VerificationCodeSent(): never {
@@ -46,11 +49,17 @@ class ThrowAuthExceptionClass {
   }
 
   UserLoggedOutSuccessfully(): never {
-    throw createCustomException(AuthResponseCode.USER_LOGGED_OUT_SUCCESSFULLY, 200);
+    throw createCustomException(
+      AuthResponseCode.USER_LOGGED_OUT_SUCCESSFULLY,
+      200,
+    );
   }
 
   PasswordResetEmailSentSuccessfully(): never {
-    throw createCustomException(AuthResponseCode.PASSWORD_RESET_EMAIL_SENT, 200);
+    throw createCustomException(
+      AuthResponseCode.PASSWORD_RESET_EMAIL_SENT,
+      200,
+    );
   }
 
   InvalidOrExpiredToken(): never {
@@ -58,19 +67,32 @@ class ThrowAuthExceptionClass {
   }
 
   PasswordResetSuccessfully(): never {
-    throw createCustomException(AuthResponseCode.PASSWORD_RESET_SUCCESSFULLY, 200);
+    throw createCustomException(
+      AuthResponseCode.PASSWORD_RESET_SUCCESSFULLY,
+      200,
+    );
   }
 
   PleaseVerifyYourEmail(data?: any): never {
-    throw createCustomException(AuthResponseCode.PLEASE_VERIFY_YOUR_EMAIL, 202, data);
+    throw createCustomException(
+      AuthResponseCode.PLEASE_VERIFY_YOUR_EMAIL,
+      202,
+      data,
+    );
   }
 
   VerificationCodeSentSuccessfully(): never {
-    throw createCustomException(AuthResponseCode.VERIFICATION_CODE_SENT_SUCCESSFULLY, 200);
+    throw createCustomException(
+      AuthResponseCode.VERIFICATION_CODE_SENT_SUCCESSFULLY,
+      200,
+    );
   }
 
   UserDeletedSuccessfully(): never {
-    throw createCustomException(AuthResponseCode.USER_DELETED_SUCCESSFULLY, 200);
+    throw createCustomException(
+      AuthResponseCode.USER_DELETED_SUCCESSFULLY,
+      200,
+    );
   }
 
   OnlyForAdmin(): never {

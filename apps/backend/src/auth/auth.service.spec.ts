@@ -51,7 +51,10 @@ describe('AuthService', () => {
 
       expect(result).toEqual({ userId: mockUser.id });
       expect(usersService.getUser).toHaveBeenCalledWith('testuser');
-      expect(bcrypt.compare).toHaveBeenCalledWith('password', mockUser.password);
+      expect(bcrypt.compare).toHaveBeenCalledWith(
+        'password',
+        mockUser.password,
+      );
     });
 
     it('should return null on incorrect password', async () => {
@@ -69,7 +72,9 @@ describe('AuthService', () => {
 
       // The service checks if user exists after getUser but before password validation
       // This test verifies the error handling path
-      await expect(service.validateUser('nonexistent', 'password')).rejects.toThrow();
+      await expect(
+        service.validateUser('nonexistent', 'password'),
+      ).rejects.toThrow();
     });
   });
 });

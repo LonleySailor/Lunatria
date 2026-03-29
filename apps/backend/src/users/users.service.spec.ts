@@ -50,7 +50,9 @@ describe('UsersService', () => {
       const result = await service.getUser('testuser');
 
       expect(result).toEqual(mockUser);
-      expect(mockUserModel.findOne).toHaveBeenCalledWith({ username: 'testuser' });
+      expect(mockUserModel.findOne).toHaveBeenCalledWith({
+        username: 'testuser',
+      });
     });
 
     it('should return null when user not found', async () => {
@@ -87,7 +89,9 @@ describe('UsersService', () => {
       const result = await service.getUserById(mockUserId.toString());
 
       expect(result).toEqual(mockUser);
-      expect(mockUserModel.findById).toHaveBeenCalledWith(new Types.ObjectId(mockUserId.toString()));
+      expect(mockUserModel.findById).toHaveBeenCalledWith(
+        new Types.ObjectId(mockUserId.toString()),
+      );
     });
 
     it('should return null when user not found', async () => {
@@ -106,7 +110,9 @@ describe('UsersService', () => {
       const result = await service.checkUniqueness('username', 'testuser');
 
       expect(result).toBe(true);
-      expect(mockUserModel.findOne).toHaveBeenCalledWith({ username: 'testuser' });
+      expect(mockUserModel.findOne).toHaveBeenCalledWith({
+        username: 'testuser',
+      });
     });
 
     it('should return false when user does not exist', async () => {
@@ -150,7 +156,9 @@ describe('UsersService', () => {
 
       await service.deleteUser(mockUser as any);
 
-      expect(mockUserModel.findOneAndDelete).toHaveBeenCalledWith({ userName: mockUser.username });
+      expect(mockUserModel.findOneAndDelete).toHaveBeenCalledWith({
+        userName: mockUser.username,
+      });
     });
   });
 });

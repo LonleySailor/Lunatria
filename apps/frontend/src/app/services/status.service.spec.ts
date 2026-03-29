@@ -25,4 +25,21 @@ describe('StatusService', () => {
       done();
     });
   });
+
+  it('requests fresh statuses without using cache', (done) => {
+    const expected = { jellyfin: true, radarr: false, sonarr: true, hoarder: false, nextcloud: false, vaultwarden: false, komga: false } as any;
+    apiSpy.get.and.resolveTo(expected);
+
+    service.getAllServiceStatuses().subscribe(() => {
+      expect(apiSpy.get).toHaveBeenCalledWith('/support/services', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+          Expires: '0',
+        },
+      });
+      done();
+    });
+  });
 });

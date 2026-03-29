@@ -63,7 +63,10 @@ describe('SessionsService', () => {
         mockSessionId,
         expect.any(Number),
       );
-      expect(mockRedisClient.expire).toHaveBeenCalledWith(`user:${mockUserId}`, 3600);
+      expect(mockRedisClient.expire).toHaveBeenCalledWith(
+        `user:${mockUserId}`,
+        3600,
+      );
     });
   });
 
@@ -75,7 +78,9 @@ describe('SessionsService', () => {
       const result = await service.getSessions(mockUserId);
 
       expect(result).toEqual(sessionIds);
-      expect(mockRedisClient.smembers).toHaveBeenCalledWith(`user:${mockUserId}`);
+      expect(mockRedisClient.smembers).toHaveBeenCalledWith(
+        `user:${mockUserId}`,
+      );
     });
 
     it('should return empty array for user with no sessions', async () => {
@@ -93,7 +98,10 @@ describe('SessionsService', () => {
 
       await service.deleteSession(mockUserId, mockSessionId);
 
-      expect(mockRedisClient.srem).toHaveBeenCalledWith(`user:${mockUserId}`, mockSessionId);
+      expect(mockRedisClient.srem).toHaveBeenCalledWith(
+        `user:${mockUserId}`,
+        mockSessionId,
+      );
     });
   });
 });

@@ -61,11 +61,15 @@ describe('CredentialsService', () => {
   describe('setCredential', () => {
     it('should encrypt and store credential', async () => {
       mockEncryptionService.encrypt.mockReturnValueOnce(mockEncryptedPayload);
-      mockCredentialModel.findOneAndUpdate.mockResolvedValueOnce(mockCredentialRecord);
+      mockCredentialModel.findOneAndUpdate.mockResolvedValueOnce(
+        mockCredentialRecord,
+      );
 
       await service.setCredential(mockUserId, mockService, mockCredentialData);
 
-      expect(encryptionService.encrypt).toHaveBeenCalledWith(mockCredentialData);
+      expect(encryptionService.encrypt).toHaveBeenCalledWith(
+        mockCredentialData,
+      );
       expect(mockCredentialModel.findOneAndUpdate).toHaveBeenCalledWith(
         { userId: mockUserId, service: mockService },
         { encryptedPayload: mockEncryptedPayload },
@@ -96,8 +100,13 @@ describe('CredentialsService', () => {
       const result = await service.getCredential(mockUserId, mockService);
 
       expect(result).toEqual(mockCredentialData);
-      expect(mockCredentialModel.findOne).toHaveBeenCalledWith({ userId: mockUserId, service: mockService });
-      expect(encryptionService.decrypt).toHaveBeenCalledWith(mockEncryptedPayload);
+      expect(mockCredentialModel.findOne).toHaveBeenCalledWith({
+        userId: mockUserId,
+        service: mockService,
+      });
+      expect(encryptionService.decrypt).toHaveBeenCalledWith(
+        mockEncryptedPayload,
+      );
     });
 
     it('should return null when credential not found', async () => {
@@ -116,14 +125,19 @@ describe('CredentialsService', () => {
 
       await service.deleteCredential(mockUserId, mockService);
 
-      expect(mockCredentialModel.deleteOne).toHaveBeenCalledWith({ userId: mockUserId, service: mockService });
+      expect(mockCredentialModel.deleteOne).toHaveBeenCalledWith({
+        userId: mockUserId,
+        service: mockService,
+      });
     });
 
     it('should handle deletion of non-existent credential', async () => {
       mockCredentialModel.deleteOne.mockResolvedValueOnce({ deletedCount: 0 });
 
       // Should not throw, just silently succeed
-      await expect(service.deleteCredential(mockUserId, 'nonexistent')).resolves.not.toThrow();
+      await expect(
+        service.deleteCredential(mockUserId, 'nonexistent'),
+      ).resolves.not.toThrow();
     });
   });
 });

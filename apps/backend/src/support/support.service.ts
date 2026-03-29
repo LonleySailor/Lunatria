@@ -1,7 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { firstValueFrom, of, catchError } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
+import { AxiosError } from 'axios';
+import { Agent as HttpsAgent } from 'https';
 import { UsersService } from 'src/users/users.service';
 import { ConfigService } from 'src/config/config.service';
 import { SERVICES_CONSTANTS } from 'src/config/constants';
@@ -27,13 +28,27 @@ export class SupportService {
 
   private buildServices(): Record<ServiceName, string> {
     return {
-      hoarder: this.configService.getServicePublicUrl(SERVICES_CONSTANTS.SERVICES.HOARDER),
-      nextcloud: this.configService.getServicePublicUrl(SERVICES_CONSTANTS.SERVICES.NEXTCLOUD),
-      vaultwarden: this.configService.getServicePublicUrl(SERVICES_CONSTANTS.SERVICES.VAULTWARDEN),
-      jellyfin: this.configService.getServicePublicUrl(SERVICES_CONSTANTS.SERVICES.JELLYFIN),
-      radarr: this.configService.getServicePublicUrl(SERVICES_CONSTANTS.SERVICES.RADARR),
-      sonarr: this.configService.getServicePublicUrl(SERVICES_CONSTANTS.SERVICES.SONARR),
-      komga: this.configService.getServicePublicUrl(SERVICES_CONSTANTS.SERVICES.KOMGA),
+      hoarder: this.configService.getServicePublicUrl(
+        SERVICES_CONSTANTS.SERVICES.HOARDER,
+      ),
+      nextcloud: this.configService.getServicePublicUrl(
+        SERVICES_CONSTANTS.SERVICES.NEXTCLOUD,
+      ),
+      vaultwarden: this.configService.getServicePublicUrl(
+        SERVICES_CONSTANTS.SERVICES.VAULTWARDEN,
+      ),
+      jellyfin: this.configService.getServicePublicUrl(
+        SERVICES_CONSTANTS.SERVICES.JELLYFIN,
+      ),
+      radarr: this.configService.getServicePublicUrl(
+        SERVICES_CONSTANTS.SERVICES.RADARR,
+      ),
+      sonarr: this.configService.getServicePublicUrl(
+        SERVICES_CONSTANTS.SERVICES.SONARR,
+      ),
+      komga: this.configService.getServicePublicUrl(
+        SERVICES_CONSTANTS.SERVICES.KOMGA,
+      ),
     };
   }
 
@@ -42,23 +57,21 @@ export class SupportService {
     const entries = await Promise.all(
       Object.entries(services).map(async ([name, url]) => {
         const service = name as ServiceName;
+        const isHttpsUrl = url.toLowerCase().startsWith('https://');
 
         try {
           const response = await firstValueFrom(
-            this.http
-              .get(url, {
-                timeout: 10000, // 10 seconds timeout
-                validateStatus: () => true, // Accept all status codes
-              })
-              .pipe(
-                catchError((err) => {
-                  return of(null);
-                }),
-              ),
+            this.http.get(url, {
+              timeout: 10000,
+              validateStatus: () => true,
+              ...(isHttpsUrl && process.env.NODE_ENV !== 'production'
+                ? { httpsAgent: new HttpsAgent({ rejectUnauthorized: false }) }
+                : {}),
+            }),
           );
 
-          if (!response || response.status !== 200) {
-            throw new Error(`Invalid status: ${response?.status ?? 'null'}`);
+          if (response.status >= 500) {
+            return [service, false] as const;
           }
 
           const body =
@@ -78,6 +91,11 @@ export class SupportService {
 
           return [service, true] as const;
         } catch (err) {
+          const error = err as AxiosError;
+          const reason = error.message || 'unknown error';
+          this.logger.warn(
+            `Failed to check ${service} at ${url}: ${reason}`,
+          );
           return [service, false] as const;
         }
       }),
@@ -87,7 +105,7 @@ export class SupportService {
   }
 
   async checkServiceAccess(req: any, serviceName: string): Promise<boolean> {
-    const user = await this.usersService.getUserById(req.session.passport.user);
+    const user = await this.usersService.getUserById(req.session?.passport?.user);
     return user.allowedServices.includes(serviceName);
   }
 }

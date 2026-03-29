@@ -7,7 +7,11 @@ import { SessionController } from './sessions.controller';
 import { DATABASE_CONSTANTS } from 'src/config/constants';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: DATABASE_CONSTANTS.SCHEMAS.USER, schema: userSchema }])],
+  imports: [
+    MongooseModule.forFeature([
+      { name: DATABASE_CONSTANTS.SCHEMAS.USER, schema: userSchema },
+    ]),
+  ],
   controllers: [SessionController],
   providers: [SessionsService, SessionSerializer],
   exports: [SessionsService, SessionSerializer],

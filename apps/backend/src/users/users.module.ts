@@ -10,7 +10,9 @@ import { DATABASE_CONSTANTS } from 'src/config/constants';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: DATABASE_CONSTANTS.SCHEMAS.USER, schema: userSchema }]),
+    MongooseModule.forFeature([
+      { name: DATABASE_CONSTANTS.SCHEMAS.USER, schema: userSchema },
+    ]),
     SessionsModule,
     HttpModule,
     ConfigModule,

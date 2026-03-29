@@ -17,11 +17,10 @@ export class SonarrController {
   @UseGuards(ServiceAccessGuard)
   @All('*')
   async proxy(@Req() req: any, @Res() res: Response) {
-    const userId = req.session.passport.user;
+    const userId = req?.session?.passport?.user;
     const domainName = this.configService.getDomainName();
     const cookieMaxAge = this.configService.getServiceCookieMaxAge();
     const sonarrPublicUrl = this.configService.getSonarrPublicUrl();
-
     if (!req.cookies[SERVICES_CONSTANTS.COOKIES.SONARR]) {
       const sonarrCookie = await this.sonarrService.getSonarrCookie(userId);
 

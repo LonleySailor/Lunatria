@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, BehaviorSubject, from } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import { environment } from '../../environments/environment';
 import { ApiService } from './api.service';
 import { API_ENDPOINTS } from '../config/constants';
 
@@ -11,7 +10,6 @@ type ServiceName = 'hoarder' | 'nextcloud' | 'vaultwarden' | 'jellyfin' | 'radar
   providedIn: 'root'
 })
 export class StatusService {
-  private readonly apiUrl = `${environment.apiBaseUrl}${API_ENDPOINTS.SUPPORT.SERVICES}`;
   private lastKnownStatuses = new BehaviorSubject<Record<ServiceName, boolean>>({
     hoarder: false,
     nextcloud: false,
@@ -25,7 +23,16 @@ export class StatusService {
   constructor(private api: ApiService) { }
 
   getAllServiceStatuses(): Observable<Record<ServiceName, boolean>> {
-    return from(this.api.get<Record<ServiceName, boolean>>(API_ENDPOINTS.SUPPORT.SERVICES)).pipe(
+    return from(
+      this.api.get<Record<ServiceName, boolean>>(API_ENDPOINTS.SUPPORT.SERVICES, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+          Expires: '0',
+        },
+      })
+    ).pipe(
       tap((statuses) => this.lastKnownStatuses.next(statuses)),
       catchError(() => of(this.lastKnownStatuses.value))
     );

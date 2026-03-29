@@ -41,14 +41,14 @@ export class SonarrService {
     }
 
     const creds = await this.credentialsService.getCredential(userId, 'sonarr');
-    console.log(`Attempting to authenticate with Sonarr at ${this.sonarrUrl}`);
+
 
     try {
       const res = await axios.post(
         `${this.getBaseUrl()}/login`,
         new URLSearchParams({
-          username: creds.username,
-          password: creds.password,
+          username: creds?.username,
+          password: creds?.password,
           rememberMe: 'on',
         }),
         {

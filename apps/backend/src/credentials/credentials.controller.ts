@@ -22,7 +22,7 @@ export class CredentialsController {
   constructor(
     private readonly credentialsService: CredentialsService,
     private readonly userService: UsersService,
-  ) { }
+  ) {}
 
   @Post(AUTH_CONSTANTS.ENDPOINTS.CREDENTIALS_ADD)
   async addCredential(@Req() req: any, @Body() body: any) {
@@ -40,7 +40,7 @@ export class CredentialsController {
 
   @Get(AUTH_CONSTANTS.ENDPOINTS.CREDENTIALS_GET)
   async getCredential(@Param('service') service: string, @Req() req: any) {
-    const userId = req.session.passport?.id;
+    const userId = req.session?.passport?.id;
     return this.credentialsService.getCredential(userId, service);
   }
 

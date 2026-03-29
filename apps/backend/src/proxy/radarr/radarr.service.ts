@@ -16,14 +16,12 @@ export class RadarrService {
     @Inject(REDIS_CLIENT) redis: Redis,
   ) {
     this.redis = redis;
-  }
-
-  getBaseUrl(): string {
     if (!this.radarrUrl) {
       throw new Error('RADARR_BASE_URL is not configured');
     }
-    return this.radarrUrl;
   }
+
+
 
   async getRadarrCookie(userId: string): Promise<string> {
     const redisKey = `radarr:cookie:${userId}`;
@@ -44,10 +42,10 @@ export class RadarrService {
 
     try {
       const res = await axios.post(
-        `${this.getBaseUrl()}/login`,
+        `${this.radarrUrl}/login`,
         new URLSearchParams({
-          username: creds.username,
-          password: creds.password,
+          username: creds?.username,
+          password: creds?.password,
           rememberMe: 'on',
         }),
         {

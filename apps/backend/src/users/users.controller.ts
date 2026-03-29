@@ -20,7 +20,11 @@ import { Response } from 'express';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import Redis from 'ioredis';
 import { ConfigService } from 'src/config/config.service';
-import { APP_CONSTANTS, AUTH_CONSTANTS, SERVICES_CONSTANTS } from 'src/config/constants';
+import {
+  APP_CONSTANTS,
+  AUTH_CONSTANTS,
+  SERVICES_CONSTANTS,
+} from 'src/config/constants';
 import { Inject } from '@nestjs/common';
 import { REDIS_CLIENT } from 'src/redis/redis.module';
 
@@ -48,7 +52,10 @@ export class UsersController {
     if (await this.usersService.checkUniqueness('username', userName)) {
       throwException.UsernameAlreadyUsed();
     }
-    const hashedPassword = await bcrypt.hash(userPassword, AUTH_CONSTANTS.BCRYPT_ROUNDS);
+    const hashedPassword = await bcrypt.hash(
+      userPassword,
+      AUTH_CONSTANTS.BCRYPT_ROUNDS,
+    );
     const result = await this.usersService.insertUser(
       userName,
       hashedPassword,
@@ -69,9 +76,8 @@ export class UsersController {
     @Body('username') username: string,
   ): Promise<any> {
     const user = await this.usersService.getUser(username);
-    const userId = req.session.passport.user; // Passport sets this after login
-    const sessionId = req.session.id; // Get the session ID from Express session
-
+    const userId = req.session.passport.user; 
+    const sessionId = req.session.id; 
     if (userId && sessionId) {
       await this.sessionService.saveSession(userId, sessionId); // Save session to Redis
     }
@@ -88,7 +94,8 @@ export class UsersController {
       req.session.destroy((err) => {
         if (err) {
           reject(err);
-        } else {this.configService.getDomainName();
+        } else {
+          this.configService.getDomainName();
           const domain = this.configService.getDomainName();
           res
             .clearCookie(APP_CONSTANTS.SESSION_NAME, {
@@ -176,7 +183,7 @@ export class UsersController {
       });
     });
   }
-
+  @UseGuards(AuthenticatedGuard)
   @Delete(AUTH_CONSTANTS.ENDPOINTS.DELETE_USER)
   async deleteUser(
     @Body('username') username: string,

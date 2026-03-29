@@ -40,7 +40,11 @@ describe('EncryptionService', () => {
 
   describe('decrypt', () => {
     it('should decrypt encrypted data correctly', () => {
-      const originalData = { username: 'testuser', token: 'secrettoken', email: 'test@example.com' };
+      const originalData = {
+        username: 'testuser',
+        token: 'secrettoken',
+        email: 'test@example.com',
+      };
 
       const encrypted = service.encrypt(originalData);
       const decrypted = service.decrypt(encrypted);

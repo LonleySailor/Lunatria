@@ -10,7 +10,7 @@ export class CredentialsService {
     @InjectModel(Credential.name)
     private credentialModel: Model<CredentialDocument>,
     private readonly encryptionService: EncryptionService,
-  ) { }
+  ) {}
 
   async setCredential(
     userId: string,

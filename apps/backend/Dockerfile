@@ -17,6 +17,8 @@ WORKDIR /app
 
 # Copy built artifacts
 COPY --from=builder /app/apps/backend/dist ./dist
+# Copy static public assets
+COPY --from=builder /app/apps/backend/public ./dist/public
 # Copy node_modules (this includes all modules, might be large but ensures it works)
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/apps/backend/package.json ./
