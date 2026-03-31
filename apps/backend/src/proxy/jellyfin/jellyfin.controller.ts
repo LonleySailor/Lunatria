@@ -1,17 +1,42 @@
-import { Controller, All, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, All, Req, Res, UseGuards, Post, Body } from '@nestjs/common';
 import { Response } from 'express';
 import { ServiceAccessGuard } from 'src/auth/guards/service.access.guard';
 import { Service } from 'src/auth/decorators/service.decorator';
 import { JellyfinService } from './jellyfin.service';
 import { SERVICES_CONSTANTS } from 'src/config/constants';
 import { ConfigService } from 'src/config/config.service';
+import { AuthService } from 'src/auth/auth.service';
+import { throwException } from 'src/responseStatus/auth.response';
 
 @Controller(SERVICES_CONSTANTS.JELLYFIN.ROUTE)
 export class JellyfinController {
   constructor(
     private readonly jellyfinService: JellyfinService,
     private readonly configService: ConfigService,
+    private readonly authService: AuthService,
   ) {}
+
+  @Post(SERVICES_CONSTANTS.JELLYFIN.ENDPOINT_APP_AUTH)
+  async appAuth(
+    @Body() body: { Username: string; Pw: string },
+    @Res() res: Response,
+  ) {
+    // Validate Lunatria credentials (throws if user not found or invalid)
+    const validatedUser = await this.authService.validateUser(
+      body.Username,
+      body.Pw,
+    );
+    if (!validatedUser) {
+      throwException.IncorrectPassword();
+    }
+
+    // Get full Jellyfin auth response using user's stored credentials
+    // This returns the complete Jellyfin auth response (User, SessionInfo, AccessToken, etc.)
+    const jellyfinAuthResponse =
+      await this.jellyfinService.authenticateForApp(validatedUser.userId);
+    // Return the response directly to the app
+    res.json(jellyfinAuthResponse);
+  }
 
   @Service(SERVICES_CONSTANTS.SERVICES.JELLYFIN)
   @UseGuards(ServiceAccessGuard)
