@@ -56,6 +56,9 @@ export enum SessionResponseCode {
  */
 export enum CredentialsResponseCode {
   CREDENTIALS_ALREADY_EXIST = 801,
+  SERVICE_REGISTRATION_FAILED = 802,
+  JELLYFIN_USER_CREATION_FAILED = 803,
+  ADMIN_SERVICE_CREDENTIALS_MISSING = 804,
 }
 
 /**

@@ -6,6 +6,7 @@ import { SessionsModule } from './sessions/sessions.module';
 import { SessionMiddleware } from './sessions/sessions.middleware';
 import { ProxyModule } from './proxy/proxy.module';
 import { CredentialsModule } from './credentials/credentials.module';
+import { AdminModule } from './admin/admin.module';
 import { SupportModule } from './support/support.module';
 import { RedisModule } from './redis/redis.module';
 import { ConfigModule } from './config/config.module';
@@ -26,6 +27,7 @@ import { ConfigService } from './config/config.service';
     AuthModule,
     SessionsModule,
     CredentialsModule,
+    AdminModule,
     ProxyModule,
     SupportModule,
   ],

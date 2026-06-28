@@ -20,4 +20,10 @@ export const API_ENDPOINTS = {
     BASE: '/credentials',
     ADD: '/credentials/add',
   },
+  ADMIN: {
+    BASE: '/admin',
+    SERVICES: '/admin/services',
+    USERS_WITHOUT_CREDENTIAL: '/admin/users-without-credential',
+    REGISTER_CREDENTIAL: '/admin/register-credential',
+  },
 } as const;

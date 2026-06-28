@@ -13,7 +13,7 @@ export class UsersService {
 
   async deleteUser(user: user) {
     const userName = user.username;
-    await this.userModel.findOneAndDelete({username: userName });
+    await this.userModel.findOneAndDelete({ username: userName });
   }
   async insertUser(
     username: string,
@@ -36,6 +36,10 @@ export class UsersService {
   async getUser(username: string) {
     const user = await this.userModel.findOne({ username });
     return user;
+  }
+
+  async getAllUsers() {
+    return this.userModel.find();
   }
   async getUserId(username: string): Promise<string | null> {
     const user = await this.userModel.findOne({ username });

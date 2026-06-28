@@ -13,6 +13,29 @@
     "NAVIGATION": {
         "HOME": "Strona główna"
     },
+    "ADMIN": {
+        "ADD_CREDENTIALS": "Dodaj dane logowania do usługi",
+        "SELECT_SERVICE": "Wybierz usługę",
+        "ASSIGN_TO_USER": "Przypisz do użytkownika",
+        "SELECT_USER": "Wybierz użytkownika",
+        "NO_USERS_AVAILABLE": "Wszyscy użytkownicy mają już dane logowania do tej usługi.",
+        "AUTO_REGISTER": "Automatycznie zarejestruj konto w usłudze",
+        "AUTO_REGISTER_HINT": "Tworzy konto automatycznie i zapisuje jego dane logowania. Wyłącz, aby wprowadzić dane ręcznie.",
+        "USERNAME": "Nazwa użytkownika",
+        "PASSWORD": "Hasło",
+        "EMAIL": "E-mail",
+        "SAVE_CREDENTIALS": "Zapisz dane logowania",
+        "CONFIRM_SAVE": "Czy na pewno chcesz zapisać te dane logowania?",
+        "YES": "Tak",
+        "NO": "Nie",
+        "CREDENTIALS_SAVED": "Dane logowania zostały zapisane.",
+        "TARGET_USER_NOT_FOUND": "Nie znaleziono użytkownika docelowego.",
+        "CREDENTIALS_ALREADY_EXIST": "Ten użytkownik ma już dane logowania do wybranej usługi.",
+        "JELLYFIN_CREATION_FAILED": "Nie udało się utworzyć konta Jellyfin.",
+        "REGISTRATION_FAILED": "Nie udało się zarejestrować usługi. Sprawdź konfigurację usługi.",
+        "SERVICES_LOAD_FAILED": "Nie udało się załadować dostępnych usług.",
+        "USERS_LOAD_FAILED": "Nie udało się załadować użytkowników."
+    },
     "PROFILE": {
         "MENU_PROFILE": "Profil",
         "USER_PROFILE": "Profil użytkownika",

@@ -76,8 +76,8 @@ export class UsersController {
     @Body('username') username: string,
   ): Promise<any> {
     const user = await this.usersService.getUser(username);
-    const userId = req.session.passport.user; 
-    const sessionId = req.session.id; 
+    const userId = req.session.passport.user;
+    const sessionId = req.session.id;
     if (userId && sessionId) {
       await this.sessionService.saveSession(userId, sessionId); // Save session to Redis
     }

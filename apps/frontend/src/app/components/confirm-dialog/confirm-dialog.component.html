@@ -1,0 +1,13 @@
+<div class="confirm-overlay" *ngIf="open">
+  <div class="confirm-box">
+    <p class="confirm-message">{{ message }}</p>
+    <div class="confirm-actions">
+      <button type="button" class="confirm-yes" (click)="confirm.emit()">
+        {{ 'ADMIN.YES' | translate }}
+      </button>
+      <button type="button" class="confirm-no" (click)="cancel.emit()">
+        {{ 'ADMIN.NO' | translate }}
+      </button>
+    </div>
+  </div>
+</div>

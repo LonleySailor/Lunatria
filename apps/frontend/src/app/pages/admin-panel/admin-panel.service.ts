@@ -25,27 +25,29 @@ export class AdminPanelService {
     });
   }
 
-  async addCredentials(credentialsData: {
+  async getAvailableServices() {
+    return this.api.get<
+      { name: string; label: string; requiresEmail: boolean; supportsAutoRegister: boolean }[]
+    >(API_ENDPOINTS.ADMIN.SERVICES);
+  }
+
+  async getUsersWithoutCredential(service: string) {
+    return this.api.get<{ id: string; username: string; email: string }[]>(
+      `${API_ENDPOINTS.ADMIN.USERS_WITHOUT_CREDENTIAL}/${service}`,
+    );
+  }
+
+  async registerCredential(payload: {
     service: string;
-    username?: string;
-    password: string;
-    email?: string;
     targetUser: string;
+    autoRegister: boolean;
+    username?: string;
+    password?: string;
+    email?: string;
   }) {
-    const payload: any = {
-      service: credentialsData.service,
-      password: credentialsData.password,
-      targetUser: credentialsData.targetUser,
-    };
-
-    if (credentialsData.username) {
-      payload.username = credentialsData.username;
-    }
-
-    if (credentialsData.email) {
-      payload.email = credentialsData.email;
-    }
-
-    return await this.api.post<any>(API_ENDPOINTS.CREDENTIALS.ADD, payload);
+    return await this.api.post<any>(
+      API_ENDPOINTS.ADMIN.REGISTER_CREDENTIAL,
+      payload,
+    );
   }
 }

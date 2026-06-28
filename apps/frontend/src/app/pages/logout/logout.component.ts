@@ -14,7 +14,6 @@ import { RESPONSE_CODES } from '../../config/response-codes.const';
     imports: [NgIf, FooterComponent, BackgroundComponent], // ✅ add NgIf
 })
 export class LogoutComponent implements OnInit {
-    // Extended step logic for Radarr and Sonarr
     step:
         | 'radarr-main'
         | 'radarr-cleanup'
@@ -22,7 +21,6 @@ export class LogoutComponent implements OnInit {
         | 'sonarr-cleanup'
         | 'done' = 'radarr-main';
 
-    // Tracking progress: added 'sonarr' service
     services = new Set(['jellyfin', 'radarr', 'sonarr', 'general']);
     completed = new Set<string>();
 

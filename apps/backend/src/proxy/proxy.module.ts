@@ -30,5 +30,6 @@ import { ConfigModule } from 'src/config/config.module';
     SonarrController,
   ],
   providers: [ProxyService, JellyfinService, RadarrService, SonarrService],
+  exports: [JellyfinService],
 })
 export class ProxyModule {}

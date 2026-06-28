@@ -109,6 +109,65 @@ export class JellyfinService {
     }
   }
 
+  /**
+   * Create a new Jellyfin user account using the requesting admin's authority.
+   * Authenticates as the admin (via their stored Jellyfin credentials) to obtain
+   * an access token, creates the user, then sets the provided password.
+   */
+  async createUser(
+    adminUserId: string,
+    name: string,
+    password: string,
+  ): Promise<void> {
+    const { accessToken } = await this.getJellyfinToken(adminUserId);
+    try {
+      const createRes = await this.http.axiosRef.post(
+        `${this.getBaseUrl()}/Users/New`,
+        { Name: name },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Emby-Token': accessToken,
+          },
+        },
+      );
+
+      const newUserId = createRes.data?.Id;
+      if (!newUserId) {
+        throw new Error('No user id returned from Jellyfin');
+      }
+
+      await this.http.axiosRef.post(
+        `${this.getBaseUrl()}/Users/${newUserId}/Password`,
+        { CurrentPw: '', NewPw: password },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Emby-Token': accessToken,
+          },
+        },
+      );
+
+      await this.auditService.log(
+        adminUserId,
+        'jellyfin',
+        'success',
+        `Created Jellyfin user "${name}"`,
+        '/admin/register',
+      );
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message;
+      await this.auditService.log(
+        adminUserId,
+        'jellyfin',
+        'fail',
+        `User creation failed: ${errorMessage}`,
+        '/admin/register',
+      );
+      throw new Error(`Failed to create Jellyfin user: ${errorMessage}`);
+    }
+  }
+
   getTargetUrl(originalPath: string): string {
     // Remove the /jellyfin prefix from the path
     const pathWithoutPrefix = originalPath.replace(/^\/jellyfin/, '');

@@ -17,6 +17,29 @@
     "NAVIGATION": {
         "HOME": "Home"
     },
+    "ADMIN": {
+        "ADD_CREDENTIALS": "Add Service Credentials",
+        "SELECT_SERVICE": "Select service",
+        "ASSIGN_TO_USER": "Assign to user",
+        "SELECT_USER": "Select user",
+        "NO_USERS_AVAILABLE": "All users already have credentials for this service.",
+        "AUTO_REGISTER": "Auto-register account in service",
+        "AUTO_REGISTER_HINT": "Creates the account automatically and stores its credentials. Turn off to enter credentials manually.",
+        "USERNAME": "Username",
+        "PASSWORD": "Password",
+        "EMAIL": "Email",
+        "SAVE_CREDENTIALS": "Save Credentials",
+        "CONFIRM_SAVE": "Are you sure you want to save these credentials?",
+        "YES": "Yes",
+        "NO": "No",
+        "CREDENTIALS_SAVED": "Credentials saved successfully.",
+        "TARGET_USER_NOT_FOUND": "Target user not found.",
+        "CREDENTIALS_ALREADY_EXIST": "This user already has credentials for the selected service.",
+        "JELLYFIN_CREATION_FAILED": "Failed to create the Jellyfin account.",
+        "REGISTRATION_FAILED": "Failed to register the service. Check the service configuration.",
+        "SERVICES_LOAD_FAILED": "Failed to load available services.",
+        "USERS_LOAD_FAILED": "Failed to load users."
+    },
     "PROFILE": {
         "MENU_PROFILE": "Profile",
         "USER_PROFILE": "User Profile",
