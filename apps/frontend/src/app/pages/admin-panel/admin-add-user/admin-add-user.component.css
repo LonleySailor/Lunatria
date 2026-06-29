@@ -1,7 +1,7 @@
  .form-group {
     margin-bottom: 1.5rem;
     }
-  
+
    input {
     width: 100%;
     padding: 12px;
@@ -12,12 +12,72 @@
     font-size: 1rem;
     transition: all 0.3s ease;
    }
-  
+
    input::placeholder {
     color: rgba(255, 255, 255, 0.7);
    }
-  
+
    input:focus {
     outline: none;
     background: rgba(255, 255, 255, 0.2);
+   }
+
+   .hint {
+    margin: 0.35rem 0 0;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+   }
+
+   .error-hint {
+    color: #ff8a8a;
+   }
+
+   /* Segmented user-type control */
+   .segmented {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+   }
+
+   .segment {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+   }
+
+   .segment:hover {
+    color: white;
+   }
+
+   .segment.active {
+    background: #3a7afe;
+    color: white;
+    box-shadow: 0 2px 8px rgba(58, 122, 254, 0.4);
+   }
+
+   /* Allowed services checkboxes */
+   .checkbox-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.5rem;
+   }
+
+   .checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    text-transform: capitalize;
+   }
+
+   .checkbox-item input {
+    width: auto;
    }
