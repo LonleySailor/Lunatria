@@ -1,0 +1,38 @@
+<div class="glass-card">
+  <h2>{{ 'ADMIN.SERVICE_ACCESS_TITLE' | translate }}</h2>
+
+  <div class="form-group">
+    <label>{{ 'ADMIN.SELECT_SERVICE' | translate }}:</label>
+    <select [(ngModel)]="selectedService" (change)="onServiceChange()" name="service">
+      <option value="" disabled selected>{{ 'ADMIN.SELECT_SERVICE' | translate }}</option>
+      <option *ngFor="let service of services" [value]="service.name">{{ service.label }}</option>
+    </select>
+  </div>
+
+  <form (ngSubmit)="onSubmit()" #accessForm="ngForm" *ngIf="selectedService">
+    <div class="form-group">
+      <label>{{ 'ADMIN.GRANT_TO_USER' | translate }}:</label>
+      <select [(ngModel)]="targetUser" name="targetUser" required>
+        <option value="" disabled selected>{{ 'ADMIN.SELECT_USER' | translate }}</option>
+        <option *ngFor="let user of users" [value]="user.username">
+          {{ user.username }} — {{ roleLabelKey(user.userType) | translate }}
+        </option>
+      </select>
+      <p class="hint" *ngIf="users.length === 0">{{ 'ADMIN.NO_USERS_WITHOUT_ACCESS' | translate }}</p>
+      <p class="hint warning-hint" *ngIf="selectedUser && !selectedUser.hasCredentials">
+        {{ 'ADMIN.NO_CREDENTIALS_WARNING' | translate }}
+      </p>
+    </div>
+
+    <button type="submit" [disabled]="!accessForm.form.valid">
+      {{ 'ADMIN.GRANT_ACCESS' | translate }}
+    </button>
+  </form>
+</div>
+
+<app-confirm-dialog
+  [open]="confirmOpen"
+  [message]="'ADMIN.CONFIRM_GRANT_ACCESS' | translate"
+  (confirm)="onConfirmGrant()"
+  (cancel)="onCancelConfirm()"
+></app-confirm-dialog>

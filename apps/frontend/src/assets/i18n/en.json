@@ -51,7 +51,16 @@
         "JELLYFIN_CREATION_FAILED": "Failed to create the Jellyfin account.",
         "REGISTRATION_FAILED": "Failed to register the service. Check the service configuration.",
         "SERVICES_LOAD_FAILED": "Failed to load available services.",
-        "USERS_LOAD_FAILED": "Failed to load users."
+        "USERS_LOAD_FAILED": "Failed to load users.",
+        "SERVICE_ACCESS_TITLE": "Grant Service Access",
+        "GRANT_TO_USER": "Grant access to user",
+        "GRANT_ACCESS": "Grant Access",
+        "CONFIRM_GRANT_ACCESS": "Are you sure you want to grant this user access to the service?",
+        "ACCESS_GRANTED": "Access granted to \"{{username}}\".",
+        "ACCESS_GRANT_FAILED": "Failed to grant access.",
+        "USER_ALREADY_HAS_ACCESS": "This user already has access to the selected service.",
+        "NO_USERS_WITHOUT_ACCESS": "All users already have access to this service.",
+        "NO_CREDENTIALS_WARNING": "Note: this user has no stored credentials for this service, so they won't be able to log in until credentials are added."
     },
     "PROFILE": {
         "MENU_PROFILE": "Profile",

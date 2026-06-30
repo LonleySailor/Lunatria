@@ -47,7 +47,16 @@
         "JELLYFIN_CREATION_FAILED": "Nie udało się utworzyć konta Jellyfin.",
         "REGISTRATION_FAILED": "Nie udało się zarejestrować usługi. Sprawdź konfigurację usługi.",
         "SERVICES_LOAD_FAILED": "Nie udało się załadować dostępnych usług.",
-        "USERS_LOAD_FAILED": "Nie udało się załadować użytkowników."
+        "USERS_LOAD_FAILED": "Nie udało się załadować użytkowników.",
+        "SERVICE_ACCESS_TITLE": "Przyznaj dostęp do usługi",
+        "GRANT_TO_USER": "Przyznaj dostęp użytkownikowi",
+        "GRANT_ACCESS": "Przyznaj dostęp",
+        "CONFIRM_GRANT_ACCESS": "Czy na pewno chcesz przyznać temu użytkownikowi dostęp do usługi?",
+        "ACCESS_GRANTED": "Przyznano dostęp użytkownikowi \"{{username}}\".",
+        "ACCESS_GRANT_FAILED": "Nie udało się przyznać dostępu.",
+        "USER_ALREADY_HAS_ACCESS": "Ten użytkownik ma już dostęp do wybranej usługi.",
+        "NO_USERS_WITHOUT_ACCESS": "Wszyscy użytkownicy mają już dostęp do tej usługi.",
+        "NO_CREDENTIALS_WARNING": "Uwaga: ten użytkownik nie ma zapisanych danych logowania do tej usługi, więc nie będzie mógł się zalogować, dopóki nie zostaną dodane."
     },
     "PROFILE": {
         "MENU_PROFILE": "Profil",

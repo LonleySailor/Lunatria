@@ -21,6 +21,8 @@ describe('AdminService', () => {
     usersService = {
       getAllUsers: jest.fn(),
       getUserId: jest.fn(),
+      getUser: jest.fn(),
+      addAllowedService: jest.fn(),
     };
     credentialsService = {
       getUserIdsWithService: jest.fn(),
@@ -65,6 +67,103 @@ describe('AdminService', () => {
       expect(result).toEqual([
         { id: targetUserId, username: 'alice', email: 'a@x.com' },
       ]);
+    });
+  });
+
+  describe('getUsersWithoutAccess', () => {
+    it('lists users lacking access, with role and credential flags', async () => {
+      usersService.getAllUsers.mockResolvedValueOnce([
+        {
+          _id: targetUserId,
+          username: 'alice',
+          email: 'a@x.com',
+          userType: 'user',
+          allowedServices: [],
+        },
+        {
+          _id: '507f1f77bcf86cd799439012',
+          username: 'bob',
+          email: 'b@x.com',
+          userType: 'admin',
+          allowedServices: ['jellyfin'],
+        },
+        {
+          _id: '507f1f77bcf86cd799439013',
+          username: 'carol',
+          email: 'c@x.com',
+          userType: 'user',
+          allowedServices: [],
+        },
+      ]);
+      // carol already has stored credentials for jellyfin
+      credentialsService.getUserIdsWithService.mockResolvedValueOnce([
+        '507f1f77bcf86cd799439013',
+      ]);
+
+      const result = await service.getUsersWithoutAccess('jellyfin');
+
+      // bob is filtered out (already has access); alice + carol remain
+      expect(result).toEqual([
+        {
+          id: targetUserId,
+          username: 'alice',
+          email: 'a@x.com',
+          userType: 'user',
+          hasCredentials: false,
+        },
+        {
+          id: '507f1f77bcf86cd799439013',
+          username: 'carol',
+          email: 'c@x.com',
+          userType: 'user',
+          hasCredentials: true,
+        },
+      ]);
+    });
+  });
+
+  describe('grantAccess', () => {
+    it('throws when the target user does not exist', async () => {
+      usersService.getUser.mockResolvedValueOnce(null);
+
+      await expect(
+        service.grantAccess({ service: 'jellyfin', targetUser: 'ghost' }),
+      ).rejects.toThrow(HttpException);
+      expect(usersService.addAllowedService).not.toHaveBeenCalled();
+    });
+
+    it('rejects when the user already has access', async () => {
+      usersService.getUser.mockResolvedValueOnce({
+        _id: targetUserId,
+        allowedServices: ['jellyfin'],
+      });
+
+      await expect(
+        service.grantAccess({ service: 'jellyfin', targetUser: 'alice' }),
+      ).rejects.toThrow(HttpException);
+      expect(usersService.addAllowedService).not.toHaveBeenCalled();
+    });
+
+    it('adds the service to allowedServices on success', async () => {
+      usersService.getUser.mockResolvedValueOnce({
+        _id: targetUserId,
+        allowedServices: [],
+      });
+
+      const result = await service.grantAccess({
+        service: 'jellyfin',
+        targetUser: 'alice',
+      });
+
+      expect(usersService.addAllowedService).toHaveBeenCalledWith(
+        targetUserId,
+        'jellyfin',
+      );
+      expect(result).toEqual({
+        success: true,
+        service: 'jellyfin',
+        targetUser: 'alice',
+      });
     });
   });
 

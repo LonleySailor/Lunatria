@@ -25,5 +25,7 @@ export const API_ENDPOINTS = {
     SERVICES: '/admin/services',
     USERS_WITHOUT_CREDENTIAL: '/admin/users-without-credential',
     REGISTER_CREDENTIAL: '/admin/register-credential',
+    USERS_WITHOUT_ACCESS: '/admin/users-without-access',
+    GRANT_ACCESS: '/admin/grant-access',
   },
 } as const;

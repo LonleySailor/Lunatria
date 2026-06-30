@@ -7,7 +7,11 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { AdminService, RegisterCredentialBody } from './admin.service';
+import {
+  AdminService,
+  GrantAccessBody,
+  RegisterCredentialBody,
+} from './admin.service';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { AUTH_CONSTANTS } from 'src/config/constants';
 
@@ -30,5 +34,15 @@ export class AdminController {
   registerCredential(@Body() body: RegisterCredentialBody, @Req() req: any) {
     const adminUserId = req.session.passport.user;
     return this.adminService.registerCredential(body, adminUserId);
+  }
+
+  @Get(AUTH_CONSTANTS.ENDPOINTS.ADMIN_USERS_WITHOUT_ACCESS)
+  getUsersWithoutAccess(@Param('service') service: string) {
+    return this.adminService.getUsersWithoutAccess(service);
+  }
+
+  @Post(AUTH_CONSTANTS.ENDPOINTS.ADMIN_GRANT_ACCESS)
+  grantAccess(@Body() body: GrantAccessBody) {
+    return this.adminService.grantAccess(body);
   }
 }

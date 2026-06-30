@@ -38,6 +38,7 @@ export enum AuthResponseCode {
   USER_DELETED_SUCCESSFULLY = 617,
   ONLY_FOR_ADMIN = 618,
   NO_SERVICE_ACCESS = 619,
+  USER_ALREADY_HAS_ACCESS = 620,
 }
 
 /**

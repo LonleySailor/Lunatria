@@ -17,6 +17,11 @@ export interface RegisterCredentialBody {
   email?: string;
 }
 
+export interface GrantAccessBody {
+  service: string;
+  targetUser: string;
+}
+
 const JELLYFIN_PASSWORD_LENGTH = 16;
 
 @Injectable()
@@ -47,6 +52,43 @@ export class AdminService {
         username: u.username,
         email: u.email,
       }));
+  }
+
+  /**
+   * Users that do not have access (allowedServices) to the given service.
+   * Includes admins (flagged via userType) and notes whether each user already
+   * has stored credentials for the service, so the UI can warn when missing.
+   */
+  async getUsersWithoutAccess(service: string) {
+    const [users, userIdsWithCred] = await Promise.all([
+      this.usersService.getAllUsers(),
+      this.credentialsService.getUserIdsWithService(service),
+    ]);
+    const withCredentials = new Set(userIdsWithCred.map((id) => id.toString()));
+    return users
+      .filter((u) => !(u.allowedServices ?? []).includes(service))
+      .map((u) => ({
+        id: u._id.toString(),
+        username: u.username,
+        email: u.email,
+        userType: u.userType,
+        hasCredentials: withCredentials.has(u._id.toString()),
+      }));
+  }
+
+  /**
+   * Grant a user access to a service by adding it to their allowedServices[].
+   * Does not touch credentials (the two axes are managed independently).
+   */
+  async grantAccess(body: GrantAccessBody) {
+    const { service, targetUser } = body;
+    const user = await this.usersService.getUser(targetUser);
+    if (!user) throwException.Usernotfound();
+    if ((user.allowedServices ?? []).includes(service)) {
+      throwException.UserAlreadyHasAccess();
+    }
+    await this.usersService.addAllowedService(user._id.toString(), service);
+    return { success: true, service, targetUser };
   }
 
   /**

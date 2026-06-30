@@ -60,4 +60,10 @@ export class UsersService {
 
     return user;
   }
+
+  async addAllowedService(userId: string, service: string) {
+    await this.userModel.findByIdAndUpdate(new Types.ObjectId(userId), {
+      $addToSet: { allowedServices: service },
+    });
+  }
 }

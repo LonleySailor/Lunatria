@@ -102,6 +102,10 @@ class ThrowAuthExceptionClass {
   NoServiceAccess(): never {
     throw createCustomException(AuthResponseCode.NO_SERVICE_ACCESS, 401);
   }
+
+  UserAlreadyHasAccess(): never {
+    throw createCustomException(AuthResponseCode.USER_ALREADY_HAS_ACCESS, 409);
+  }
 }
 
 export const throwException = new ThrowAuthExceptionClass();
