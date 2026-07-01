@@ -29,5 +29,7 @@ export const API_ENDPOINTS = {
     GRANT_ACCESS: '/admin/grant-access',
     USERS_WITH_ACCESS: '/admin/users-with-access',
     REVOKE_ACCESS: '/admin/revoke-access',
+    USERS_WITH_CREDENTIAL: '/admin/users-with-credential',
+    REVOKE_CREDENTIAL: '/admin/revoke-credential',
   },
 } as const;

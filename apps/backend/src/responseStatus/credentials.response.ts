@@ -38,6 +38,21 @@ class ThrowCredentialsExceptionClass {
       400,
     );
   }
+
+  CredentialsNotFound(): never {
+    throw createCustomException(
+      CredentialsResponseCode.CREDENTIALS_NOT_FOUND,
+      404,
+    );
+  }
+
+  JellyfinUserDeletionFailed(message?: string): never {
+    throw createCustomException(
+      CredentialsResponseCode.JELLYFIN_USER_DELETION_FAILED,
+      502,
+      message ? { message } : undefined,
+    );
+  }
 }
 
 export const throwCredentialsException = new ThrowCredentialsExceptionClass();

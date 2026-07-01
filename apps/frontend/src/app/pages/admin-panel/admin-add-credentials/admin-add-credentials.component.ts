@@ -20,6 +20,8 @@ interface SelectableUser {
   email: string;
 }
 
+type CredentialMode = 'grant' | 'revoke';
+
 @Component({
   selector: 'app-admin-add-credentials',
   templateUrl: './admin-add-credentials.component.html',
@@ -29,6 +31,7 @@ interface SelectableUser {
 export class AdminAddCredentialsComponent implements OnInit {
   services: SsoService[] = [];
   users: SelectableUser[] = [];
+  mode: CredentialMode = 'grant';
   selectedService = '';
   autoRegister = true;
   confirmOpen = false;
@@ -63,8 +66,26 @@ export class AdminAddCredentialsComponent implements OnInit {
     return this.services.find((s) => s.name === this.selectedService);
   }
 
+  get isJellyfinSelected(): boolean {
+    return this.selectedService === 'jellyfin';
+  }
+
   serviceRequiresEmail(): boolean {
     return !!this.currentService?.requiresEmail;
+  }
+
+  setMode(mode: CredentialMode) {
+    if (this.mode === mode) return;
+    this.mode = mode;
+    this.selectedService = '';
+    this.autoRegister = true;
+    this.users = [];
+    this.credentials = {
+      username: '',
+      password: '',
+      email: '',
+      targetUser: '',
+    };
   }
 
   async onServiceChange() {
@@ -79,9 +100,13 @@ export class AdminAddCredentialsComponent implements OnInit {
     if (!this.selectedService) return;
     try {
       this.users =
-        (await this.adminService.getUsersWithoutCredential(
-          this.selectedService,
-        )) ?? [];
+        (this.mode === 'grant'
+          ? await this.adminService.getUsersWithoutCredential(
+              this.selectedService,
+            )
+          : await this.adminService.getUsersWithCredential(
+              this.selectedService,
+            )) ?? [];
     } catch {
       this.toastr.error(this.translate.instant('ADMIN.USERS_LOAD_FAILED'));
     }
@@ -93,6 +118,14 @@ export class AdminAddCredentialsComponent implements OnInit {
 
   onCancelConfirm() {
     this.confirmOpen = false;
+  }
+
+  onConfirm() {
+    if (this.mode === 'grant') {
+      this.onConfirmSave();
+    } else {
+      this.onConfirmRevoke();
+    }
   }
 
   async onConfirmSave() {
@@ -134,6 +167,39 @@ export class AdminAddCredentialsComponent implements OnInit {
       this.toastr.success(this.translate.instant('ADMIN.CREDENTIALS_SAVED'));
       this.selectedService = '';
       await this.onServiceChange();
+    }
+  }
+
+  async onConfirmRevoke() {
+    this.confirmOpen = false;
+
+    const response = await this.adminService.revokeCredential({
+      service: this.selectedService,
+      targetUser: this.credentials.targetUser,
+    });
+
+    if (response?.responseCode === RESPONSE_CODES.AUTH.USER_NOT_FOUND) {
+      this.toastr.error(this.translate.instant('ADMIN.TARGET_USER_NOT_FOUND'));
+    } else if (
+      response?.responseCode ===
+      RESPONSE_CODES.CREDENTIALS.CREDENTIALS_NOT_FOUND
+    ) {
+      this.toastr.error(this.translate.instant('ADMIN.CREDENTIALS_NOT_FOUND'));
+    } else if (
+      response?.responseCode ===
+      RESPONSE_CODES.CREDENTIALS.JELLYFIN_USER_DELETION_FAILED
+    ) {
+      this.toastr.error(this.translate.instant('ADMIN.JELLYFIN_DELETION_FAILED'));
+    } else if (response?.success) {
+      this.toastr.success(
+        this.translate.instant('ADMIN.CREDENTIALS_REVOKED', {
+          username: this.credentials.targetUser,
+        }),
+      );
+      this.selectedService = '';
+      await this.onServiceChange();
+    } else {
+      this.toastr.error(this.translate.instant('ADMIN.CREDENTIALS_REVOKE_FAILED'));
     }
   }
 }

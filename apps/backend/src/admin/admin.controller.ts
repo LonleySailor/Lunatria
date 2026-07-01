@@ -55,4 +55,15 @@ export class AdminController {
   revokeAccess(@Body() body: GrantAccessBody) {
     return this.adminService.revokeAccess(body);
   }
+
+  @Get(AUTH_CONSTANTS.ENDPOINTS.ADMIN_USERS_WITH_CREDENTIAL)
+  getUsersWithCredential(@Param('service') service: string) {
+    return this.adminService.getUsersWithCredential(service);
+  }
+
+  @Post(AUTH_CONSTANTS.ENDPOINTS.ADMIN_REVOKE_CREDENTIAL)
+  revokeCredential(@Body() body: GrantAccessBody, @Req() req: any) {
+    const adminUserId = req.session.passport.user;
+    return this.adminService.revokeCredential(body, adminUserId);
+  }
 }

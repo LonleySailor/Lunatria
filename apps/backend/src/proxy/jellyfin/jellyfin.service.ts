@@ -168,6 +168,70 @@ export class JellyfinService {
     }
   }
 
+  /**
+   * Delete a Jellyfin user account using the requesting admin's authority.
+   * The true inverse of createUser. Looks the user up by name; if no such
+   * account exists it logs and returns (so Lunatria-side cleanup can still
+   * proceed), otherwise it deletes the account. Real API errors are rethrown.
+   */
+  async deleteUser(adminUserId: string, name: string): Promise<void> {
+    const { accessToken } = await this.getJellyfinToken(adminUserId);
+    try {
+      const usersRes = await this.http.axiosRef.get(
+        `${this.getBaseUrl()}/Users`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Emby-Token': accessToken,
+          },
+        },
+      );
+
+      const target = (usersRes.data ?? []).find(
+        (u: { Name?: string; Id?: string }) => u.Name === name,
+      );
+
+      if (!target?.Id) {
+        await this.auditService.log(
+          adminUserId,
+          'jellyfin',
+          'success',
+          `Jellyfin user "${name}" not found; nothing to delete`,
+          '/admin/revoke',
+        );
+        return;
+      }
+
+      await this.http.axiosRef.delete(
+        `${this.getBaseUrl()}/Users/${target.Id}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Emby-Token': accessToken,
+          },
+        },
+      );
+
+      await this.auditService.log(
+        adminUserId,
+        'jellyfin',
+        'success',
+        `Deleted Jellyfin user "${name}"`,
+        '/admin/revoke',
+      );
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message;
+      await this.auditService.log(
+        adminUserId,
+        'jellyfin',
+        'fail',
+        `User deletion failed: ${errorMessage}`,
+        '/admin/revoke',
+      );
+      throw new Error(`Failed to delete Jellyfin user: ${errorMessage}`);
+    }
+  }
+
   getTargetUrl(originalPath: string): string {
     // Remove the /jellyfin prefix from the path
     const pathWithoutPrefix = originalPath.replace(/^\/jellyfin/, '');

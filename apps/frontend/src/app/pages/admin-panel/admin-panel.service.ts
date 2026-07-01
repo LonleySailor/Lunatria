@@ -82,4 +82,17 @@ export class AdminPanelService {
   async revokeAccess(payload: { service: string; targetUser: string }) {
     return await this.api.post<any>(API_ENDPOINTS.ADMIN.REVOKE_ACCESS, payload);
   }
+
+  async getUsersWithCredential(service: string) {
+    return this.api.get<{ id: string; username: string; email: string }[]>(
+      `${API_ENDPOINTS.ADMIN.USERS_WITH_CREDENTIAL}/${service}`,
+    );
+  }
+
+  async revokeCredential(payload: { service: string; targetUser: string }) {
+    return await this.api.post<any>(
+      API_ENDPOINTS.ADMIN.REVOKE_CREDENTIAL,
+      payload,
+    );
+  }
 }

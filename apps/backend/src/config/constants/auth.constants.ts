@@ -52,6 +52,8 @@ export const AUTH_CONSTANTS = {
     ADMIN_GRANT_ACCESS: 'grant-access',
     ADMIN_USERS_WITH_ACCESS: 'users-with-access/:service',
     ADMIN_REVOKE_ACCESS: 'revoke-access',
+    ADMIN_USERS_WITH_CREDENTIAL: 'users-with-credential/:service',
+    ADMIN_REVOKE_CREDENTIAL: 'revoke-credential',
     AUDIT_GET: '',
   } as const,
 

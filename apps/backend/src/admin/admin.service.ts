@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import Redis from 'ioredis';
 import { UsersService } from 'src/users/users.service';
 import { CredentialsService } from 'src/credentials/credentials.service';
 import { JellyfinService } from 'src/proxy/jellyfin/jellyfin.service';
@@ -7,6 +8,7 @@ import { SSO_SERVICES, SERVICES_CONSTANTS } from 'src/config/constants';
 import { throwException } from 'src/responseStatus/auth.response';
 import { throwCredentialsException } from 'src/responseStatus/credentials.response';
 import { generateRandomPassword } from 'src/common/password.util';
+import { REDIS_CLIENT } from 'src/redis/redis.module';
 
 export interface RegisterCredentialBody {
   service: string;
@@ -31,6 +33,7 @@ export class AdminService {
     private readonly credentialsService: CredentialsService,
     private readonly jellyfinService: JellyfinService,
     private readonly configService: ConfigService,
+    @Inject(REDIS_CLIENT) private readonly redis: Redis,
   ) {}
 
   /** Services available for SSO / auto-registration (static config). */
@@ -47,6 +50,22 @@ export class AdminService {
     const taken = new Set(userIdsWithCred.map((id) => id.toString()));
     return users
       .filter((u) => !taken.has(u._id.toString()))
+      .map((u) => ({
+        id: u._id.toString(),
+        username: u.username,
+        email: u.email,
+      }));
+  }
+
+  /** Users that currently have a stored credential for the given service. */
+  async getUsersWithCredential(service: string) {
+    const [users, userIdsWithCred] = await Promise.all([
+      this.usersService.getAllUsers(),
+      this.credentialsService.getUserIdsWithService(service),
+    ]);
+    const taken = new Set(userIdsWithCred.map((id) => id.toString()));
+    return users
+      .filter((u) => taken.has(u._id.toString()))
       .map((u) => ({
         id: u._id.toString(),
         username: u.username,
@@ -177,6 +196,37 @@ export class AdminService {
           `Auto-registration is not supported for service "${service}"`,
         );
     }
+
+    return { success: true, service, targetUser };
+  }
+
+  /**
+   * Revoke a user's stored credential for a service. For Jellyfin this also
+   * deletes the real account (inverse of creation); Radarr/Sonarr share a
+   * static account so only the stored credential is removed. The cached proxy
+   * token/cookie is cleared so access stops immediately. Access
+   * (allowedServices) is left untouched.
+   */
+  async revokeCredential(body: GrantAccessBody, adminUserId: string) {
+    const { service, targetUser } = body;
+
+    const userId = await this.usersService.getUserId(targetUser);
+    if (!userId) throwException.Usernotfound();
+
+    const cred = await this.credentialsService.getCredential(userId, service);
+    if (!cred) throwCredentialsException.CredentialsNotFound();
+
+    if (service === SERVICES_CONSTANTS.SERVICES.JELLYFIN) {
+      try {
+        await this.jellyfinService.deleteUser(adminUserId, cred.username);
+      } catch (error) {
+        throwCredentialsException.JellyfinUserDeletionFailed(error.message);
+      }
+    }
+
+    await this.credentialsService.deleteCredential(userId, service);
+    await this.redis.del(`${service}:token:${userId}`);
+    await this.redis.del(`${service}:cookie:${userId}`);
 
     return { success: true, service, targetUser };
   }

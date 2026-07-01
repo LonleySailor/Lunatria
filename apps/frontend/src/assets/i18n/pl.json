@@ -67,7 +67,19 @@
         "ACCESS_REVOKE_FAILED": "Nie udało się odebrać dostępu.",
         "USER_DOES_NOT_HAVE_ACCESS": "Ten użytkownik nie ma dostępu do wybranej usługi.",
         "NO_USERS_WITH_ACCESS": "Żaden użytkownik nie ma obecnie dostępu do tej usługi.",
-        "ADMIN_REVOKE_NO_EFFECT": "Uwaga: ten użytkownik jest administratorem i pomija sprawdzanie dostępu do poszczególnych usług, więc odebranie dostępu nie ma praktycznego wpływu na jego dostęp."
+        "ADMIN_REVOKE_NO_EFFECT": "Uwaga: ten użytkownik jest administratorem i pomija sprawdzanie dostępu do poszczególnych usług, więc odebranie dostępu nie ma praktycznego wpływu na jego dostęp.",
+        "CRED_GRANT_MODE": "Dodaj dane logowania",
+        "CRED_REVOKE_MODE": "Usuń dane logowania",
+        "REVOKE_CREDENTIALS_TITLE": "Usuń dane logowania do usługi",
+        "REVOKE_CRED_FROM_USER": "Usuń dane logowania użytkownikowi",
+        "REVOKE_CREDENTIALS": "Usuń dane logowania",
+        "CONFIRM_REVOKE_CREDENTIALS": "Czy na pewno chcesz usunąć dane logowania tego użytkownika do usługi?",
+        "CREDENTIALS_REVOKED": "Usunięto dane logowania użytkownikowi \"{{username}}\".",
+        "CREDENTIALS_REVOKE_FAILED": "Nie udało się usunąć danych logowania.",
+        "CREDENTIALS_NOT_FOUND": "Ten użytkownik nie ma zapisanych danych logowania do wybranej usługi.",
+        "JELLYFIN_DELETION_FAILED": "Nie udało się usunąć konta Jellyfin.",
+        "NO_USERS_WITH_CREDENTIAL": "Żaden użytkownik nie ma danych logowania do tej usługi.",
+        "JELLYFIN_REVOKE_WARNING": "Ostrzeżenie: usunięcie danych logowania Jellyfin trwale usuwa również konto Jellyfin użytkownika (wraz z biblioteką i historią oglądania). Tej operacji nie można cofnąć."
     },
     "PROFILE": {
         "MENU_PROFILE": "Profil",
