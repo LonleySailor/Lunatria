@@ -22,6 +22,8 @@ interface AccessUser {
   hasCredentials: boolean;
 }
 
+type AccessMode = 'grant' | 'revoke';
+
 @Component({
   selector: 'app-admin-service-access',
   templateUrl: './admin-service-access.component.html',
@@ -31,6 +33,7 @@ interface AccessUser {
 export class AdminServiceAccessComponent implements OnInit {
   services: SsoService[] = [];
   users: AccessUser[] = [];
+  mode: AccessMode = 'grant';
   selectedService = '';
   targetUser = '';
   confirmOpen = false;
@@ -53,13 +56,27 @@ export class AdminServiceAccessComponent implements OnInit {
     return this.users.find((u) => u.username === this.targetUser);
   }
 
+  get isAdminSelected(): boolean {
+    return this.selectedUser?.userType === 'admin';
+  }
+
+  setMode(mode: AccessMode) {
+    if (this.mode === mode) return;
+    this.mode = mode;
+    this.selectedService = '';
+    this.targetUser = '';
+    this.users = [];
+  }
+
   async onServiceChange() {
     this.targetUser = '';
     this.users = [];
     if (!this.selectedService) return;
     try {
       this.users =
-        (await this.adminService.getUsersWithoutAccess(this.selectedService)) ??
+        (this.mode === 'grant'
+          ? await this.adminService.getUsersWithoutAccess(this.selectedService)
+          : await this.adminService.getUsersWithAccess(this.selectedService)) ??
         [];
     } catch {
       this.toastr.error(this.translate.instant('ADMIN.USERS_LOAD_FAILED'));
@@ -67,7 +84,9 @@ export class AdminServiceAccessComponent implements OnInit {
   }
 
   roleLabelKey(userType: string): string {
-    return userType === 'admin' ? 'ADMIN.USER_TYPE_ADMIN' : 'ADMIN.USER_TYPE_USER';
+    return userType === 'admin'
+      ? 'ADMIN.USER_TYPE_ADMIN'
+      : 'ADMIN.USER_TYPE_USER';
   }
 
   onSubmit() {
@@ -76,6 +95,14 @@ export class AdminServiceAccessComponent implements OnInit {
 
   onCancelConfirm() {
     this.confirmOpen = false;
+  }
+
+  onConfirm() {
+    if (this.mode === 'grant') {
+      this.onConfirmGrant();
+    } else {
+      this.onConfirmRevoke();
+    }
   }
 
   async onConfirmGrant() {
@@ -91,9 +118,7 @@ export class AdminServiceAccessComponent implements OnInit {
     } else if (
       response?.responseCode === RESPONSE_CODES.AUTH.USER_ALREADY_HAS_ACCESS
     ) {
-      this.toastr.error(
-        this.translate.instant('ADMIN.USER_ALREADY_HAS_ACCESS'),
-      );
+      this.toastr.error(this.translate.instant('ADMIN.USER_ALREADY_HAS_ACCESS'));
     } else if (response?.success) {
       this.toastr.success(
         this.translate.instant('ADMIN.ACCESS_GRANTED', {
@@ -104,6 +129,35 @@ export class AdminServiceAccessComponent implements OnInit {
       await this.onServiceChange();
     } else {
       this.toastr.error(this.translate.instant('ADMIN.ACCESS_GRANT_FAILED'));
+    }
+  }
+
+  async onConfirmRevoke() {
+    this.confirmOpen = false;
+
+    const response = await this.adminService.revokeAccess({
+      service: this.selectedService,
+      targetUser: this.targetUser,
+    });
+
+    if (response?.responseCode === RESPONSE_CODES.AUTH.USER_NOT_FOUND) {
+      this.toastr.error(this.translate.instant('ADMIN.TARGET_USER_NOT_FOUND'));
+    } else if (
+      response?.responseCode === RESPONSE_CODES.AUTH.USER_DOES_NOT_HAVE_ACCESS
+    ) {
+      this.toastr.error(
+        this.translate.instant('ADMIN.USER_DOES_NOT_HAVE_ACCESS'),
+      );
+    } else if (response?.success) {
+      this.toastr.success(
+        this.translate.instant('ADMIN.ACCESS_REVOKED', {
+          username: this.targetUser,
+        }),
+      );
+      this.selectedService = '';
+      await this.onServiceChange();
+    } else {
+      this.toastr.error(this.translate.instant('ADMIN.ACCESS_REVOKE_FAILED'));
     }
   }
 }

@@ -45,4 +45,14 @@ export class AdminController {
   grantAccess(@Body() body: GrantAccessBody) {
     return this.adminService.grantAccess(body);
   }
+
+  @Get(AUTH_CONSTANTS.ENDPOINTS.ADMIN_USERS_WITH_ACCESS)
+  getUsersWithAccess(@Param('service') service: string) {
+    return this.adminService.getUsersWithAccess(service);
+  }
+
+  @Post(AUTH_CONSTANTS.ENDPOINTS.ADMIN_REVOKE_ACCESS)
+  revokeAccess(@Body() body: GrantAccessBody) {
+    return this.adminService.revokeAccess(body);
+  }
 }

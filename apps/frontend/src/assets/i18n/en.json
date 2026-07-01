@@ -60,7 +60,18 @@
         "ACCESS_GRANT_FAILED": "Failed to grant access.",
         "USER_ALREADY_HAS_ACCESS": "This user already has access to the selected service.",
         "NO_USERS_WITHOUT_ACCESS": "All users already have access to this service.",
-        "NO_CREDENTIALS_WARNING": "Note: this user has no stored credentials for this service, so they won't be able to log in until credentials are added."
+        "NO_CREDENTIALS_WARNING": "Note: this user has no stored credentials for this service, so they won't be able to log in until credentials are added.",
+        "GRANT_MODE": "Grant service access",
+        "REVOKE_MODE": "Revoke service access",
+        "REVOKE_SERVICE_ACCESS_TITLE": "Revoke Service Access",
+        "REVOKE_FROM_USER": "Revoke access from user",
+        "REVOKE_ACCESS": "Revoke Access",
+        "CONFIRM_REVOKE_ACCESS": "Are you sure you want to revoke this user's access to the service?",
+        "ACCESS_REVOKED": "Access revoked from \"{{username}}\".",
+        "ACCESS_REVOKE_FAILED": "Failed to revoke access.",
+        "USER_DOES_NOT_HAVE_ACCESS": "This user does not have access to the selected service.",
+        "NO_USERS_WITH_ACCESS": "No users currently have access to this service.",
+        "ADMIN_REVOKE_NO_EFFECT": "Note: this user is an admin and bypasses per-service access checks, so revoking has no practical effect on their access."
     },
     "PROFILE": {
         "MENU_PROFILE": "Profile",

@@ -77,6 +77,27 @@ export class AdminService {
   }
 
   /**
+   * Users that currently have access (allowedServices) to the given service.
+   * Mirror of getUsersWithoutAccess, used by the revoke flow.
+   */
+  async getUsersWithAccess(service: string) {
+    const [users, userIdsWithCred] = await Promise.all([
+      this.usersService.getAllUsers(),
+      this.credentialsService.getUserIdsWithService(service),
+    ]);
+    const withCredentials = new Set(userIdsWithCred.map((id) => id.toString()));
+    return users
+      .filter((u) => (u.allowedServices ?? []).includes(service))
+      .map((u) => ({
+        id: u._id.toString(),
+        username: u.username,
+        email: u.email,
+        userType: u.userType,
+        hasCredentials: withCredentials.has(u._id.toString()),
+      }));
+  }
+
+  /**
    * Grant a user access to a service by adding it to their allowedServices[].
    * Does not touch credentials (the two axes are managed independently).
    */
@@ -88,6 +109,21 @@ export class AdminService {
       throwException.UserAlreadyHasAccess();
     }
     await this.usersService.addAllowedService(user._id.toString(), service);
+    return { success: true, service, targetUser };
+  }
+
+  /**
+   * Revoke a user's access to a service by removing it from allowedServices[].
+   * Does not touch credentials (the two axes are managed independently).
+   */
+  async revokeAccess(body: GrantAccessBody) {
+    const { service, targetUser } = body;
+    const user = await this.usersService.getUser(targetUser);
+    if (!user) throwException.Usernotfound();
+    if (!(user.allowedServices ?? []).includes(service)) {
+      throwException.UserDoesNotHaveAccess();
+    }
+    await this.usersService.removeAllowedService(user._id.toString(), service);
     return { success: true, service, targetUser };
   }
 

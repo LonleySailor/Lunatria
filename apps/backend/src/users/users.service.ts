@@ -66,4 +66,10 @@ export class UsersService {
       $addToSet: { allowedServices: service },
     });
   }
+
+  async removeAllowedService(userId: string, service: string) {
+    await this.userModel.findByIdAndUpdate(new Types.ObjectId(userId), {
+      $pull: { allowedServices: service },
+    });
+  }
 }

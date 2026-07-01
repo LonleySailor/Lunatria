@@ -23,6 +23,7 @@ describe('AdminService', () => {
       getUserId: jest.fn(),
       getUser: jest.fn(),
       addAllowedService: jest.fn(),
+      removeAllowedService: jest.fn(),
     };
     credentialsService = {
       getUserIdsWithService: jest.fn(),
@@ -156,6 +157,103 @@ describe('AdminService', () => {
       });
 
       expect(usersService.addAllowedService).toHaveBeenCalledWith(
+        targetUserId,
+        'jellyfin',
+      );
+      expect(result).toEqual({
+        success: true,
+        service: 'jellyfin',
+        targetUser: 'alice',
+      });
+    });
+  });
+
+  describe('getUsersWithAccess', () => {
+    it('lists only users whose allowedServices includes the service', async () => {
+      usersService.getAllUsers.mockResolvedValueOnce([
+        {
+          _id: targetUserId,
+          username: 'alice',
+          email: 'a@x.com',
+          userType: 'user',
+          allowedServices: ['jellyfin'],
+        },
+        {
+          _id: '507f1f77bcf86cd799439012',
+          username: 'bob',
+          email: 'b@x.com',
+          userType: 'admin',
+          allowedServices: [],
+        },
+        {
+          _id: '507f1f77bcf86cd799439013',
+          username: 'carol',
+          email: 'c@x.com',
+          userType: 'admin',
+          allowedServices: ['jellyfin'],
+        },
+      ]);
+      // alice has stored credentials for jellyfin
+      credentialsService.getUserIdsWithService.mockResolvedValueOnce([
+        targetUserId,
+      ]);
+
+      const result = await service.getUsersWithAccess('jellyfin');
+
+      // bob is filtered out (no access); alice + carol remain
+      expect(result).toEqual([
+        {
+          id: targetUserId,
+          username: 'alice',
+          email: 'a@x.com',
+          userType: 'user',
+          hasCredentials: true,
+        },
+        {
+          id: '507f1f77bcf86cd799439013',
+          username: 'carol',
+          email: 'c@x.com',
+          userType: 'admin',
+          hasCredentials: false,
+        },
+      ]);
+    });
+  });
+
+  describe('revokeAccess', () => {
+    it('throws when the target user does not exist', async () => {
+      usersService.getUser.mockResolvedValueOnce(null);
+
+      await expect(
+        service.revokeAccess({ service: 'jellyfin', targetUser: 'ghost' }),
+      ).rejects.toThrow(HttpException);
+      expect(usersService.removeAllowedService).not.toHaveBeenCalled();
+    });
+
+    it('rejects when the user does not have access', async () => {
+      usersService.getUser.mockResolvedValueOnce({
+        _id: targetUserId,
+        allowedServices: [],
+      });
+
+      await expect(
+        service.revokeAccess({ service: 'jellyfin', targetUser: 'alice' }),
+      ).rejects.toThrow(HttpException);
+      expect(usersService.removeAllowedService).not.toHaveBeenCalled();
+    });
+
+    it('removes the service from allowedServices on success', async () => {
+      usersService.getUser.mockResolvedValueOnce({
+        _id: targetUserId,
+        allowedServices: ['jellyfin'],
+      });
+
+      const result = await service.revokeAccess({
+        service: 'jellyfin',
+        targetUser: 'alice',
+      });
+
+      expect(usersService.removeAllowedService).toHaveBeenCalledWith(
         targetUserId,
         'jellyfin',
       );

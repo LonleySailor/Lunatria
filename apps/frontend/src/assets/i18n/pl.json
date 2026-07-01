@@ -56,7 +56,18 @@
         "ACCESS_GRANT_FAILED": "Nie udało się przyznać dostępu.",
         "USER_ALREADY_HAS_ACCESS": "Ten użytkownik ma już dostęp do wybranej usługi.",
         "NO_USERS_WITHOUT_ACCESS": "Wszyscy użytkownicy mają już dostęp do tej usługi.",
-        "NO_CREDENTIALS_WARNING": "Uwaga: ten użytkownik nie ma zapisanych danych logowania do tej usługi, więc nie będzie mógł się zalogować, dopóki nie zostaną dodane."
+        "NO_CREDENTIALS_WARNING": "Uwaga: ten użytkownik nie ma zapisanych danych logowania do tej usługi, więc nie będzie mógł się zalogować, dopóki nie zostaną dodane.",
+        "GRANT_MODE": "Przyznaj dostęp do usługi",
+        "REVOKE_MODE": "Odbierz dostęp do usługi",
+        "REVOKE_SERVICE_ACCESS_TITLE": "Odbierz dostęp do usługi",
+        "REVOKE_FROM_USER": "Odbierz dostęp użytkownikowi",
+        "REVOKE_ACCESS": "Odbierz dostęp",
+        "CONFIRM_REVOKE_ACCESS": "Czy na pewno chcesz odebrać temu użytkownikowi dostęp do usługi?",
+        "ACCESS_REVOKED": "Odebrano dostęp użytkownikowi \"{{username}}\".",
+        "ACCESS_REVOKE_FAILED": "Nie udało się odebrać dostępu.",
+        "USER_DOES_NOT_HAVE_ACCESS": "Ten użytkownik nie ma dostępu do wybranej usługi.",
+        "NO_USERS_WITH_ACCESS": "Żaden użytkownik nie ma obecnie dostępu do tej usługi.",
+        "ADMIN_REVOKE_NO_EFFECT": "Uwaga: ten użytkownik jest administratorem i pomija sprawdzanie dostępu do poszczególnych usług, więc odebranie dostępu nie ma praktycznego wpływu na jego dostęp."
     },
     "PROFILE": {
         "MENU_PROFILE": "Profil",

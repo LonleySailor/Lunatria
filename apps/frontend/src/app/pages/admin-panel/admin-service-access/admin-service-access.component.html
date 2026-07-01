@@ -1,4 +1,24 @@
-<div class="glass-card">
+<div class="mode-menu">
+  <button
+    type="button"
+    class="mode-button"
+    [ngClass]="{ active: mode === 'grant' }"
+    (click)="setMode('grant')"
+  >
+    {{ 'ADMIN.GRANT_MODE' | translate }}
+  </button>
+  <button
+    type="button"
+    class="mode-button"
+    [ngClass]="{ active: mode === 'revoke' }"
+    (click)="setMode('revoke')"
+  >
+    {{ 'ADMIN.REVOKE_MODE' | translate }}
+  </button>
+</div>
+
+<!-- Grant window -->
+<div class="glass-card" *ngIf="mode === 'grant'">
   <h2>{{ 'ADMIN.SERVICE_ACCESS_TITLE' | translate }}</h2>
 
   <div class="form-group">
@@ -9,7 +29,7 @@
     </select>
   </div>
 
-  <form (ngSubmit)="onSubmit()" #accessForm="ngForm" *ngIf="selectedService">
+  <form (ngSubmit)="onSubmit()" #grantForm="ngForm" *ngIf="selectedService">
     <div class="form-group">
       <label>{{ 'ADMIN.GRANT_TO_USER' | translate }}:</label>
       <select [(ngModel)]="targetUser" name="targetUser" required>
@@ -24,15 +44,48 @@
       </p>
     </div>
 
-    <button type="submit" [disabled]="!accessForm.form.valid">
+    <button type="submit" [disabled]="!grantForm.form.valid">
       {{ 'ADMIN.GRANT_ACCESS' | translate }}
+    </button>
+  </form>
+</div>
+
+<!-- Revoke window -->
+<div class="glass-card" *ngIf="mode === 'revoke'">
+  <h2>{{ 'ADMIN.REVOKE_SERVICE_ACCESS_TITLE' | translate }}</h2>
+
+  <div class="form-group">
+    <label>{{ 'ADMIN.SELECT_SERVICE' | translate }}:</label>
+    <select [(ngModel)]="selectedService" (change)="onServiceChange()" name="revokeService">
+      <option value="" disabled selected>{{ 'ADMIN.SELECT_SERVICE' | translate }}</option>
+      <option *ngFor="let service of services" [value]="service.name">{{ service.label }}</option>
+    </select>
+  </div>
+
+  <form (ngSubmit)="onSubmit()" #revokeForm="ngForm" *ngIf="selectedService">
+    <div class="form-group">
+      <label>{{ 'ADMIN.REVOKE_FROM_USER' | translate }}:</label>
+      <select [(ngModel)]="targetUser" name="revokeTargetUser" required>
+        <option value="" disabled selected>{{ 'ADMIN.SELECT_USER' | translate }}</option>
+        <option *ngFor="let user of users" [value]="user.username">
+          {{ user.username }} — {{ roleLabelKey(user.userType) | translate }}
+        </option>
+      </select>
+      <p class="hint" *ngIf="users.length === 0">{{ 'ADMIN.NO_USERS_WITH_ACCESS' | translate }}</p>
+      <p class="hint warning-hint" *ngIf="isAdminSelected">
+        {{ 'ADMIN.ADMIN_REVOKE_NO_EFFECT' | translate }}
+      </p>
+    </div>
+
+    <button type="submit" [disabled]="!revokeForm.form.valid">
+      {{ 'ADMIN.REVOKE_ACCESS' | translate }}
     </button>
   </form>
 </div>
 
 <app-confirm-dialog
   [open]="confirmOpen"
-  [message]="'ADMIN.CONFIRM_GRANT_ACCESS' | translate"
-  (confirm)="onConfirmGrant()"
+  [message]="(mode === 'grant' ? 'ADMIN.CONFIRM_GRANT_ACCESS' : 'ADMIN.CONFIRM_REVOKE_ACCESS') | translate"
+  (confirm)="onConfirm()"
   (cancel)="onCancelConfirm()"
 ></app-confirm-dialog>

@@ -39,6 +39,7 @@ export enum AuthResponseCode {
   ONLY_FOR_ADMIN = 618,
   NO_SERVICE_ACCESS = 619,
   USER_ALREADY_HAS_ACCESS = 620,
+  USER_DOES_NOT_HAVE_ACCESS = 621,
 }
 
 /**

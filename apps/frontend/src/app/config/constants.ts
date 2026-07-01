@@ -27,5 +27,7 @@ export const API_ENDPOINTS = {
     REGISTER_CREDENTIAL: '/admin/register-credential',
     USERS_WITHOUT_ACCESS: '/admin/users-without-access',
     GRANT_ACCESS: '/admin/grant-access',
+    USERS_WITH_ACCESS: '/admin/users-with-access',
+    REVOKE_ACCESS: '/admin/revoke-access',
   },
 } as const;

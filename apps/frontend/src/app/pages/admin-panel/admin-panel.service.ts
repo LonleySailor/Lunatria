@@ -66,4 +66,20 @@ export class AdminPanelService {
   async grantAccess(payload: { service: string; targetUser: string }) {
     return await this.api.post<any>(API_ENDPOINTS.ADMIN.GRANT_ACCESS, payload);
   }
+
+  async getUsersWithAccess(service: string) {
+    return this.api.get<
+      {
+        id: string;
+        username: string;
+        email: string;
+        userType: string;
+        hasCredentials: boolean;
+      }[]
+    >(`${API_ENDPOINTS.ADMIN.USERS_WITH_ACCESS}/${service}`);
+  }
+
+  async revokeAccess(payload: { service: string; targetUser: string }) {
+    return await this.api.post<any>(API_ENDPOINTS.ADMIN.REVOKE_ACCESS, payload);
+  }
 }

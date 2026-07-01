@@ -106,6 +106,13 @@ class ThrowAuthExceptionClass {
   UserAlreadyHasAccess(): never {
     throw createCustomException(AuthResponseCode.USER_ALREADY_HAS_ACCESS, 409);
   }
+
+  UserDoesNotHaveAccess(): never {
+    throw createCustomException(
+      AuthResponseCode.USER_DOES_NOT_HAVE_ACCESS,
+      409,
+    );
+  }
 }
 
 export const throwException = new ThrowAuthExceptionClass();
