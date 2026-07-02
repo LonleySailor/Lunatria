@@ -66,4 +66,14 @@ export class AdminController {
     const adminUserId = req.session.passport.user;
     return this.adminService.revokeCredential(body, adminUserId);
   }
+
+  @Get(AUTH_CONSTANTS.ENDPOINTS.ADMIN_USERS)
+  getUsers(@Req() req: any) {
+    return this.adminService.getUsers(req.session.passport.user);
+  }
+
+  @Post(AUTH_CONSTANTS.ENDPOINTS.ADMIN_DELETE_USER)
+  deleteUser(@Body('targetUser') targetUser: string, @Req() req: any) {
+    return this.adminService.deleteUser(targetUser, req.session.passport.user);
+  }
 }

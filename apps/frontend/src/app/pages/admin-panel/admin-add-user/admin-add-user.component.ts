@@ -14,6 +14,15 @@ interface SsoService {
   supportsAutoRegister: boolean;
 }
 
+interface SelectableUser {
+  id: string;
+  username: string;
+  email: string;
+  userType: string;
+}
+
+type UserMode = 'create' | 'delete';
+
 @Component({
   selector: 'app-admin-add-user',
   templateUrl: './admin-add-user.component.html',
@@ -21,6 +30,7 @@ interface SsoService {
   imports: [FormsModule, CommonModule, TranslateModule, ConfirmDialogComponent],
 })
 export class AdminAddUserComponent implements OnInit {
+  mode: UserMode = 'create';
   username = '';
   password = '';
   confirmPassword = '';
@@ -28,6 +38,8 @@ export class AdminAddUserComponent implements OnInit {
   usertype = 'user';
   services: SsoService[] = [];
   selectedServices: Record<string, boolean> = {};
+  users: SelectableUser[] = [];
+  targetUser = '';
   confirmOpen = false;
 
   constructor(
@@ -51,8 +63,36 @@ export class AdminAddUserComponent implements OnInit {
     return this.password === this.confirmPassword;
   }
 
+  get selectedUser(): SelectableUser | undefined {
+    return this.users.find((u) => u.username === this.targetUser);
+  }
+
+  roleLabelKey(userType: string): string {
+    return userType === 'admin'
+      ? 'ADMIN.USER_TYPE_ADMIN'
+      : 'ADMIN.USER_TYPE_USER';
+  }
+
+  async setMode(mode: UserMode) {
+    if (this.mode === mode) return;
+    this.mode = mode;
+    this.targetUser = '';
+    this.resetForm();
+    if (mode === 'delete') {
+      await this.loadUsers();
+    }
+  }
+
+  private async loadUsers() {
+    try {
+      this.users = (await this.adminService.getUsers()) ?? [];
+    } catch {
+      this.toastr.error(this.translate.instant('ADMIN.USERS_LOAD_FAILED'));
+    }
+  }
+
   onSubmit() {
-    if (!this.passwordsMatch()) {
+    if (this.mode === 'create' && !this.passwordsMatch()) {
       this.toastr.error(this.translate.instant('ADMIN.PASSWORDS_DONT_MATCH'));
       return;
     }
@@ -61,6 +101,14 @@ export class AdminAddUserComponent implements OnInit {
 
   onCancelConfirm() {
     this.confirmOpen = false;
+  }
+
+  onConfirm() {
+    if (this.mode === 'create') {
+      this.onConfirmCreate();
+    } else {
+      this.onConfirmDelete();
+    }
   }
 
   async onConfirmCreate() {
@@ -92,6 +140,37 @@ export class AdminAddUserComponent implements OnInit {
       this.toastr.error(this.translate.instant('ADMIN.USERNAME_ALREADY_USED'));
     } else {
       this.toastr.error(this.translate.instant('ADMIN.USER_CREATE_FAILED'));
+    }
+  }
+
+  async onConfirmDelete() {
+    this.confirmOpen = false;
+
+    const response = await this.adminService.deleteUser({
+      targetUser: this.targetUser,
+    });
+
+    if (response?.responseCode === RESPONSE_CODES.AUTH.USER_NOT_FOUND) {
+      this.toastr.error(this.translate.instant('ADMIN.TARGET_USER_NOT_FOUND'));
+    } else if (
+      response?.responseCode === RESPONSE_CODES.AUTH.CANNOT_DELETE_SELF
+    ) {
+      this.toastr.error(this.translate.instant('ADMIN.CANNOT_DELETE_SELF'));
+    } else if (
+      response?.responseCode ===
+      RESPONSE_CODES.CREDENTIALS.JELLYFIN_USER_DELETION_FAILED
+    ) {
+      this.toastr.error(this.translate.instant('ADMIN.JELLYFIN_DELETION_FAILED'));
+    } else if (response?.success) {
+      this.toastr.success(
+        this.translate.instant('ADMIN.USER_DELETED', {
+          username: this.targetUser,
+        }),
+      );
+      this.targetUser = '';
+      await this.loadUsers();
+    } else {
+      this.toastr.error(this.translate.instant('ADMIN.USER_DELETE_FAILED'));
     }
   }
 

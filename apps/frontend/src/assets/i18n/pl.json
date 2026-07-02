@@ -79,7 +79,19 @@
         "CREDENTIALS_NOT_FOUND": "Ten użytkownik nie ma zapisanych danych logowania do wybranej usługi.",
         "JELLYFIN_DELETION_FAILED": "Nie udało się usunąć konta Jellyfin.",
         "NO_USERS_WITH_CREDENTIAL": "Żaden użytkownik nie ma danych logowania do tej usługi.",
-        "JELLYFIN_REVOKE_WARNING": "Ostrzeżenie: usunięcie danych logowania Jellyfin trwale usuwa również konto Jellyfin użytkownika (wraz z biblioteką i historią oglądania). Tej operacji nie można cofnąć."
+        "JELLYFIN_REVOKE_WARNING": "Ostrzeżenie: usunięcie danych logowania Jellyfin trwale usuwa również konto Jellyfin użytkownika (wraz z biblioteką i historią oglądania). Tej operacji nie można cofnąć.",
+        "USER_MANAGEMENT": "Zarządzanie użytkownikami",
+        "CREATE_MODE": "Utwórz użytkownika",
+        "DELETE_MODE": "Usuń użytkownika",
+        "DELETE_USER_TITLE": "Usuń użytkownika",
+        "SELECT_USER_TO_DELETE": "Wybierz użytkownika do usunięcia",
+        "DELETE_USER": "Usuń użytkownika",
+        "CONFIRM_DELETE_USER": "Czy na pewno chcesz usunąć tego użytkownika?",
+        "USER_DELETED": "Użytkownik \"{{username}}\" został usunięty.",
+        "USER_DELETE_FAILED": "Nie udało się usunąć użytkownika.",
+        "CANNOT_DELETE_SELF": "Nie możesz usunąć własnego konta.",
+        "NO_USERS_TO_DELETE": "Brak innych użytkowników do usunięcia.",
+        "DELETE_USER_WARNING": "Ostrzeżenie: usunięcie tego użytkownika trwale usuwa wszystkie jego zapisane dane logowania, jego konta w usługach (w tym konto Jellyfin) oraz kończy jego sesje. Tej operacji nie można cofnąć."
     },
     "PROFILE": {
         "MENU_PROFILE": "Profil",

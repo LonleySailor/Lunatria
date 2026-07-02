@@ -7,6 +7,7 @@ import { JellyfinService } from 'src/proxy/jellyfin/jellyfin.service';
 import { ConfigService } from 'src/config/config.service';
 import { SERVICES_CONSTANTS } from 'src/config/constants';
 import { REDIS_CLIENT } from 'src/redis/redis.module';
+import { SessionsService } from 'src/sessions/sessions.service';
 
 describe('AdminService', () => {
   let service: AdminService;
@@ -15,6 +16,7 @@ describe('AdminService', () => {
   let jellyfinService: any;
   let configService: any;
   let redis: any;
+  let sessionsService: any;
 
   const adminUserId = '507f1f77bcf86cd799439000';
   const targetUserId = '507f1f77bcf86cd799439011';
@@ -26,12 +28,14 @@ describe('AdminService', () => {
       getUser: jest.fn(),
       addAllowedService: jest.fn(),
       removeAllowedService: jest.fn(),
+      deleteUser: jest.fn(),
     };
     credentialsService = {
       getUserIdsWithService: jest.fn(),
       getCredential: jest.fn(),
       setCredential: jest.fn(),
       deleteCredential: jest.fn(),
+      getServicesForUser: jest.fn(),
     };
     jellyfinService = {
       createUser: jest.fn(),
@@ -44,6 +48,9 @@ describe('AdminService', () => {
     redis = {
       del: jest.fn(),
     };
+    sessionsService = {
+      deleteAllSessions: jest.fn(),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -53,6 +60,7 @@ describe('AdminService', () => {
         { provide: JellyfinService, useValue: jellyfinService },
         { provide: ConfigService, useValue: configService },
         { provide: REDIS_CLIENT, useValue: redis },
+        { provide: SessionsService, useValue: sessionsService },
       ],
     }).compile();
 
@@ -389,6 +397,110 @@ describe('AdminService', () => {
         service: 'jellyfin',
         targetUser: 'alice',
       });
+    });
+  });
+
+  describe('getUsers', () => {
+    it('returns all users except the requesting admin', async () => {
+      usersService.getAllUsers.mockResolvedValueOnce([
+        {
+          _id: adminUserId,
+          username: 'root',
+          email: 'r@x.com',
+          userType: 'admin',
+        },
+        {
+          _id: targetUserId,
+          username: 'alice',
+          email: 'a@x.com',
+          userType: 'user',
+        },
+      ]);
+
+      const result = await service.getUsers(adminUserId);
+
+      expect(result).toEqual([
+        {
+          id: targetUserId,
+          username: 'alice',
+          email: 'a@x.com',
+          userType: 'user',
+        },
+      ]);
+    });
+  });
+
+  describe('deleteUser', () => {
+    it('throws when the target user does not exist', async () => {
+      usersService.getUser.mockResolvedValueOnce(null);
+
+      await expect(
+        service.deleteUser('ghost', adminUserId),
+      ).rejects.toThrow(HttpException);
+      expect(usersService.deleteUser).not.toHaveBeenCalled();
+    });
+
+    it('refuses to delete the requesting admin', async () => {
+      usersService.getUser.mockResolvedValueOnce({ _id: adminUserId });
+
+      await expect(
+        service.deleteUser('root', adminUserId),
+      ).rejects.toThrow(HttpException);
+      expect(usersService.deleteUser).not.toHaveBeenCalled();
+    });
+
+    it('tears down credentials, accounts, sessions and the user record', async () => {
+      const userDoc = { _id: targetUserId, username: 'alice' };
+      usersService.getUser.mockResolvedValueOnce(userDoc);
+      credentialsService.getServicesForUser.mockResolvedValueOnce([
+        SERVICES_CONSTANTS.SERVICES.JELLYFIN,
+        SERVICES_CONSTANTS.SERVICES.RADARR,
+      ]);
+      credentialsService.getCredential
+        .mockResolvedValueOnce({ username: 'alice' }) // jellyfin cleanup
+        .mockResolvedValueOnce({ username: 'radarr_admin' }); // radarr cleanup
+      jellyfinService.deleteUser.mockResolvedValueOnce(undefined);
+
+      const result = await service.deleteUser('alice', adminUserId);
+
+      expect(jellyfinService.deleteUser).toHaveBeenCalledWith(
+        adminUserId,
+        'alice',
+      );
+      expect(jellyfinService.deleteUser).toHaveBeenCalledTimes(1);
+      expect(credentialsService.deleteCredential).toHaveBeenCalledWith(
+        targetUserId,
+        SERVICES_CONSTANTS.SERVICES.JELLYFIN,
+      );
+      expect(credentialsService.deleteCredential).toHaveBeenCalledWith(
+        targetUserId,
+        SERVICES_CONSTANTS.SERVICES.RADARR,
+      );
+      expect(sessionsService.deleteAllSessions).toHaveBeenCalledWith(
+        targetUserId,
+      );
+      expect(usersService.deleteUser).toHaveBeenCalledWith(userDoc);
+      expect(result).toEqual({ success: true, targetUser: 'alice' });
+    });
+
+    it('aborts (keeps the user) when a Jellyfin account deletion fails', async () => {
+      usersService.getUser.mockResolvedValueOnce({
+        _id: targetUserId,
+        username: 'alice',
+      });
+      credentialsService.getServicesForUser.mockResolvedValueOnce([
+        SERVICES_CONSTANTS.SERVICES.JELLYFIN,
+      ]);
+      credentialsService.getCredential.mockResolvedValueOnce({
+        username: 'alice',
+      });
+      jellyfinService.deleteUser.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(
+        service.deleteUser('alice', adminUserId),
+      ).rejects.toThrow(HttpException);
+      expect(usersService.deleteUser).not.toHaveBeenCalled();
+      expect(sessionsService.deleteAllSessions).not.toHaveBeenCalled();
     });
   });
 

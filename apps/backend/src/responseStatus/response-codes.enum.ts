@@ -40,6 +40,7 @@ export enum AuthResponseCode {
   NO_SERVICE_ACCESS = 619,
   USER_ALREADY_HAS_ACCESS = 620,
   USER_DOES_NOT_HAVE_ACCESS = 621,
+  CANNOT_DELETE_SELF = 622,
 }
 
 /**

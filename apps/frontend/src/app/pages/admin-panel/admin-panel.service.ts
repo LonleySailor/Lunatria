@@ -95,4 +95,14 @@ export class AdminPanelService {
       payload,
     );
   }
+
+  async getUsers() {
+    return this.api.get<
+      { id: string; username: string; email: string; userType: string }[]
+    >(API_ENDPOINTS.ADMIN.USERS);
+  }
+
+  async deleteUser(payload: { targetUser: string }) {
+    return await this.api.post<any>(API_ENDPOINTS.ADMIN.DELETE_USER, payload);
+  }
 }

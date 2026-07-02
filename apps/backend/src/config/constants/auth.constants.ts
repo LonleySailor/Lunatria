@@ -54,6 +54,8 @@ export const AUTH_CONSTANTS = {
     ADMIN_REVOKE_ACCESS: 'revoke-access',
     ADMIN_USERS_WITH_CREDENTIAL: 'users-with-credential/:service',
     ADMIN_REVOKE_CREDENTIAL: 'revoke-credential',
+    ADMIN_USERS: 'users',
+    ADMIN_DELETE_USER: 'delete-user',
     AUDIT_GET: '',
   } as const,
 

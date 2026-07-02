@@ -1,4 +1,24 @@
-<div class="glass-card">
+<div class="mode-menu">
+  <button
+    type="button"
+    class="mode-button"
+    [ngClass]="{ active: mode === 'create' }"
+    (click)="setMode('create')"
+  >
+    {{ 'ADMIN.CREATE_MODE' | translate }}
+  </button>
+  <button
+    type="button"
+    class="mode-button"
+    [ngClass]="{ active: mode === 'delete' }"
+    (click)="setMode('delete')"
+  >
+    {{ 'ADMIN.DELETE_MODE' | translate }}
+  </button>
+</div>
+
+<!-- Create user window -->
+<div class="glass-card" *ngIf="mode === 'create'">
   <h2>{{ 'ADMIN.ADD_USER_TITLE' | translate }}</h2>
   <form (ngSubmit)="onSubmit()" #userForm="ngForm">
     <div class="form-group">
@@ -57,9 +77,33 @@
   </form>
 </div>
 
+<!-- Delete user window -->
+<div class="glass-card" *ngIf="mode === 'delete'">
+  <h2>{{ 'ADMIN.DELETE_USER_TITLE' | translate }}</h2>
+  <form (ngSubmit)="onSubmit()" #deleteForm="ngForm">
+    <div class="form-group">
+      <label>{{ 'ADMIN.SELECT_USER_TO_DELETE' | translate }}:</label>
+      <select [(ngModel)]="targetUser" name="targetUser" required>
+        <option value="" disabled selected>{{ 'ADMIN.SELECT_USER' | translate }}</option>
+        <option *ngFor="let user of users" [value]="user.username">
+          {{ user.username }} — {{ roleLabelKey(user.userType) | translate }}
+        </option>
+      </select>
+      <p class="hint" *ngIf="users.length === 0">{{ 'ADMIN.NO_USERS_TO_DELETE' | translate }}</p>
+      <p class="hint warning-hint" *ngIf="selectedUser">
+        {{ 'ADMIN.DELETE_USER_WARNING' | translate }}
+      </p>
+    </div>
+
+    <button type="submit" class="danger" [disabled]="!deleteForm.form.valid">
+      {{ 'ADMIN.DELETE_USER' | translate }}
+    </button>
+  </form>
+</div>
+
 <app-confirm-dialog
   [open]="confirmOpen"
-  [message]="'ADMIN.CONFIRM_CREATE_USER' | translate"
-  (confirm)="onConfirmCreate()"
+  [message]="(mode === 'create' ? 'ADMIN.CONFIRM_CREATE_USER' : 'ADMIN.CONFIRM_DELETE_USER') | translate"
+  (confirm)="onConfirm()"
   (cancel)="onCancelConfirm()"
 ></app-confirm-dialog>

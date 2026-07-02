@@ -113,6 +113,10 @@ class ThrowAuthExceptionClass {
       409,
     );
   }
+
+  CannotDeleteSelf(): never {
+    throw createCustomException(AuthResponseCode.CANNOT_DELETE_SELF, 409);
+  }
 }
 
 export const throwException = new ThrowAuthExceptionClass();

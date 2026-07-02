@@ -9,6 +9,7 @@ import { throwException } from 'src/responseStatus/auth.response';
 import { throwCredentialsException } from 'src/responseStatus/credentials.response';
 import { generateRandomPassword } from 'src/common/password.util';
 import { REDIS_CLIENT } from 'src/redis/redis.module';
+import { SessionsService } from 'src/sessions/sessions.service';
 
 export interface RegisterCredentialBody {
   service: string;
@@ -34,6 +35,7 @@ export class AdminService {
     private readonly jellyfinService: JellyfinService,
     private readonly configService: ConfigService,
     @Inject(REDIS_CLIENT) private readonly redis: Redis,
+    private readonly sessionsService: SessionsService,
   ) {}
 
   /** Services available for SSO / auto-registration (static config). */
@@ -216,6 +218,29 @@ export class AdminService {
     const cred = await this.credentialsService.getCredential(userId, service);
     if (!cred) throwCredentialsException.CredentialsNotFound();
 
+    await this.cleanupServiceCredential(userId, service, adminUserId, cred);
+
+    return { success: true, service, targetUser };
+  }
+
+  /**
+   * Tear down a single stored credential: for Jellyfin delete the real account
+   * (inverse of creation), then delete the stored credential and clear the
+   * cached proxy token/cookie so access stops immediately. No-op if there is no
+   * stored credential for the service. A Jellyfin deletion failure aborts.
+   * Callers that already loaded the credential can pass it to avoid a re-fetch.
+   */
+  private async cleanupServiceCredential(
+    userId: string,
+    service: string,
+    adminUserId: string,
+    prefetchedCred?: { username?: string },
+  ) {
+    const cred =
+      prefetchedCred ??
+      (await this.credentialsService.getCredential(userId, service));
+    if (!cred) return;
+
     if (service === SERVICES_CONSTANTS.SERVICES.JELLYFIN) {
       try {
         await this.jellyfinService.deleteUser(adminUserId, cred.username);
@@ -227,8 +252,45 @@ export class AdminService {
     await this.credentialsService.deleteCredential(userId, service);
     await this.redis.del(`${service}:token:${userId}`);
     await this.redis.del(`${service}:cookie:${userId}`);
+  }
 
-    return { success: true, service, targetUser };
+  /**
+   * All users except the requesting admin — the candidate list for deletion.
+   */
+  async getUsers(adminUserId: string) {
+    const users = await this.usersService.getAllUsers();
+    return users
+      .filter((u) => u._id.toString() !== adminUserId)
+      .map((u) => ({
+        id: u._id.toString(),
+        username: u.username,
+        email: u.email,
+        userType: u.userType,
+      }));
+  }
+
+  /**
+   * Delete a user and fully tear down their footprint: every stored credential
+   * and its real service account (e.g. Jellyfin), cached proxy tokens, and
+   * their sessions, then the user record itself. Aborts if a service cleanup
+   * fails (the user record is left intact). Admins cannot delete themselves.
+   */
+  async deleteUser(targetUser: string, adminUserId: string) {
+    const user = await this.usersService.getUser(targetUser);
+    if (!user) throwException.Usernotfound();
+
+    const userId = user._id.toString();
+    if (userId === adminUserId) throwException.CannotDeleteSelf();
+
+    const services = await this.credentialsService.getServicesForUser(userId);
+    for (const service of services) {
+      await this.cleanupServiceCredential(userId, service, adminUserId);
+    }
+
+    await this.sessionsService.deleteAllSessions(userId);
+    await this.usersService.deleteUser(user);
+
+    return { success: true, targetUser };
   }
 
   /**

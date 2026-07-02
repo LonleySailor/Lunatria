@@ -83,7 +83,19 @@
         "CREDENTIALS_NOT_FOUND": "This user has no stored credentials for the selected service.",
         "JELLYFIN_DELETION_FAILED": "Failed to delete the Jellyfin account.",
         "NO_USERS_WITH_CREDENTIAL": "No users have credentials for this service.",
-        "JELLYFIN_REVOKE_WARNING": "Warning: revoking Jellyfin credentials also permanently deletes the user's Jellyfin account (library and watch history included). This cannot be undone."
+        "JELLYFIN_REVOKE_WARNING": "Warning: revoking Jellyfin credentials also permanently deletes the user's Jellyfin account (library and watch history included). This cannot be undone.",
+        "USER_MANAGEMENT": "User Management",
+        "CREATE_MODE": "Create user",
+        "DELETE_MODE": "Delete user",
+        "DELETE_USER_TITLE": "Delete User",
+        "SELECT_USER_TO_DELETE": "Select user to delete",
+        "DELETE_USER": "Delete User",
+        "CONFIRM_DELETE_USER": "Are you sure you want to delete this user?",
+        "USER_DELETED": "User \"{{username}}\" deleted.",
+        "USER_DELETE_FAILED": "Failed to delete the user.",
+        "CANNOT_DELETE_SELF": "You cannot delete your own account.",
+        "NO_USERS_TO_DELETE": "There are no other users to delete.",
+        "DELETE_USER_WARNING": "Warning: deleting this user permanently removes all their stored credentials, their service accounts (including their Jellyfin account), and ends their sessions. This cannot be undone."
     },
     "PROFILE": {
         "MENU_PROFILE": "Profile",
