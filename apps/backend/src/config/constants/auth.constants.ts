@@ -22,6 +22,7 @@ export const AUTH_CONSTANTS = {
     AUDIT: 'audit',
     SESSIONS: 'sessions',
     SUPPORT: 'support',
+    ADMIN: 'admin',
   } as const,
 
   // Endpoints
@@ -44,6 +45,17 @@ export const AUTH_CONSTANTS = {
     CREDENTIALS_GET: ':service',
     CREDENTIALS_PATCH: ':service',
     CREDENTIALS_DELETE: ':service',
+    ADMIN_SERVICES: 'services',
+    ADMIN_USERS_WITHOUT_CREDENTIAL: 'users-without-credential/:service',
+    ADMIN_REGISTER_CREDENTIAL: 'register-credential',
+    ADMIN_USERS_WITHOUT_ACCESS: 'users-without-access/:service',
+    ADMIN_GRANT_ACCESS: 'grant-access',
+    ADMIN_USERS_WITH_ACCESS: 'users-with-access/:service',
+    ADMIN_REVOKE_ACCESS: 'revoke-access',
+    ADMIN_USERS_WITH_CREDENTIAL: 'users-with-credential/:service',
+    ADMIN_REVOKE_CREDENTIAL: 'revoke-credential',
+    ADMIN_USERS: 'users',
+    ADMIN_DELETE_USER: 'delete-user',
     AUDIT_GET: '',
   } as const,
 

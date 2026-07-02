@@ -109,6 +109,126 @@ export class JellyfinService {
     }
   }
 
+  /**
+   * Create a new Jellyfin user account using the requesting admin's authority.
+   * Authenticates as the admin (via their stored Jellyfin credentials) to obtain
+   * an access token, creates the user, then sets the provided password.
+   */
+  async createUser(
+    adminUserId: string,
+    name: string,
+    password: string,
+  ): Promise<void> {
+    const { accessToken } = await this.getJellyfinToken(adminUserId);
+    try {
+      const createRes = await this.http.axiosRef.post(
+        `${this.getBaseUrl()}/Users/New`,
+        { Name: name },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Emby-Token': accessToken,
+          },
+        },
+      );
+
+      const newUserId = createRes.data?.Id;
+      if (!newUserId) {
+        throw new Error('No user id returned from Jellyfin');
+      }
+
+      await this.http.axiosRef.post(
+        `${this.getBaseUrl()}/Users/${newUserId}/Password`,
+        { CurrentPw: '', NewPw: password },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Emby-Token': accessToken,
+          },
+        },
+      );
+
+      await this.auditService.log(
+        adminUserId,
+        'jellyfin',
+        'success',
+        `Created Jellyfin user "${name}"`,
+        '/admin/register',
+      );
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message;
+      await this.auditService.log(
+        adminUserId,
+        'jellyfin',
+        'fail',
+        `User creation failed: ${errorMessage}`,
+        '/admin/register',
+      );
+      throw new Error(`Failed to create Jellyfin user: ${errorMessage}`);
+    }
+  }
+
+  /**
+   * Delete a Jellyfin user account using the requesting admin's authority.
+   * The true inverse of createUser. Looks the user up by name; if no such
+   * account exists it logs and returns (so Lunatria-side cleanup can still
+   * proceed), otherwise it deletes the account. Real API errors are rethrown.
+   */
+  async deleteUser(adminUserId: string, name: string): Promise<void> {
+    const { accessToken } = await this.getJellyfinToken(adminUserId);
+    try {
+      const usersRes = await this.http.axiosRef.get(
+        `${this.getBaseUrl()}/Users`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Emby-Token': accessToken,
+          },
+        },
+      );
+
+      const target = (usersRes.data ?? []).find(
+        (u: { Name?: string; Id?: string }) => u.Name === name,
+      );
+
+      if (!target?.Id) {
+        await this.auditService.log(
+          adminUserId,
+          'jellyfin',
+          'success',
+          `Jellyfin user "${name}" not found; nothing to delete`,
+          '/admin/revoke',
+        );
+        return;
+      }
+
+      await this.http.axiosRef.delete(
+        `${this.getBaseUrl()}/Users/${target.Id}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Emby-Token': accessToken,
+          },
+        },
+      );
+
+      await this.auditService.log(
+        adminUserId,
+        'jellyfin',
+        'success',
+        `Deleted Jellyfin user "${name}"`,
+        '/admin/revoke',
+      );
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message;
+      await this.auditService.log(
+        adminUserId,
+        'jellyfin',
+        'fail',
+        `User deletion failed: ${errorMessage}`,
+        '/admin/revoke',
+      );
+      throw new Error(`Failed to delete Jellyfin user: ${errorMessage}`);
   async authenticateForApp(
     userId: string,
   ): Promise<any> {

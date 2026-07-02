@@ -4,13 +4,14 @@ import { BackgroundComponent } from '../../components/background/background.comp
 import { CommonModule, NgIf } from '@angular/common';
 import { AdminAddUserComponent } from "./admin-add-user/admin-add-user.component";
 import { AdminAddCredentialsComponent } from './admin-add-credentials/admin-add-credentials.component';
+import { AdminServiceAccessComponent } from './admin-service-access/admin-service-access.component';
 import { UserProfileCircleComponent } from '../../components/user-profile-circle/user-profile-circle.component';
 
 @Component({
     selector: 'app-admin-panel',
     templateUrl: './admin-panel.component.html',
     styleUrls: ['./admin-panel.component.css'],
-    imports: [FooterComponent, BackgroundComponent, NgIf, CommonModule, AdminAddUserComponent, AdminAddCredentialsComponent, UserProfileCircleComponent],
+    imports: [FooterComponent, BackgroundComponent, NgIf, CommonModule, AdminAddUserComponent, AdminAddCredentialsComponent, AdminServiceAccessComponent, UserProfileCircleComponent],
     standalone: true
 })
 export class AdminPanelComponent {

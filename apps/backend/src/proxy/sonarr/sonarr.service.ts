@@ -42,7 +42,6 @@ export class SonarrService {
 
     const creds = await this.credentialsService.getCredential(userId, 'sonarr');
 
-
     try {
       const res = await axios.post(
         `${this.getBaseUrl()}/login`,

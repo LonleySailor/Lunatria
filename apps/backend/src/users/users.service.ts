@@ -13,7 +13,7 @@ export class UsersService {
 
   async deleteUser(user: user) {
     const userName = user.username;
-    await this.userModel.findOneAndDelete({username: userName });
+    await this.userModel.findOneAndDelete({ username: userName });
   }
   async insertUser(
     username: string,
@@ -37,6 +37,10 @@ export class UsersService {
     const user = await this.userModel.findOne({ username });
     return user;
   }
+
+  async getAllUsers() {
+    return this.userModel.find();
+  }
   async getUserId(username: string): Promise<string | null> {
     const user = await this.userModel.findOne({ username });
     if (!user) {
@@ -55,5 +59,17 @@ export class UsersService {
     const user = await this.userModel.findById(new Types.ObjectId(id));
 
     return user;
+  }
+
+  async addAllowedService(userId: string, service: string) {
+    await this.userModel.findByIdAndUpdate(new Types.ObjectId(userId), {
+      $addToSet: { allowedServices: service },
+    });
+  }
+
+  async removeAllowedService(userId: string, service: string) {
+    await this.userModel.findByIdAndUpdate(new Types.ObjectId(userId), {
+      $pull: { allowedServices: service },
+    });
   }
 }

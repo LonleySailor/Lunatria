@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Logging you in...</title>
+</head>
+
+<body>
+  <script>
+    async function bootstrapJellyfinAuth() {
+      const currentUrl = new URL(window.location.href);
+      const apiHostname = currentUrl.hostname.replace(/^jellyfin\./, 'api.');
+      const apiBaseUrl = `${currentUrl.protocol}//${apiHostname}${currentUrl.port ? `:${currentUrl.port}` : ''}`;
+
+      const response = await fetch(`${apiBaseUrl}/jellyfin/get-auth-data`, {
+        method: 'GET',
+        credentials: 'include',
+        cache: 'no-store',
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch Jellyfin auth data (${response.status})`);
+      }
+
+      const { accessToken, userId, serverId } = await response.json();
+      const jellyfinCredentials = {
+        Servers: [
+          {
+            DateLastAccessed: Date.now(),
+            LastConnectionMode: 2,
+            ManualAddress: "https://jellyfin.lunatria.test",
+            manualAddressOnly: true,
+            Name: "jellyfin",
+            Id: serverId || 'default-server',
+            LocalAddress: "http://192.168.33.36:8096",
+            AccessToken: accessToken,
+            UserId: userId,
+          },
+        ],
+      };
+
+      localStorage.setItem(
+        "jellyfin_credentials",
+        JSON.stringify(jellyfinCredentials)
+      );
+
+      // Redirect to Jellyfin main app
+      window.location.href = "/web/index.html";
+    }
+
+    bootstrapJellyfinAuth().catch((error) => {
+      console.error('Failed to complete Jellyfin login bridge', error);
+      document.body.innerHTML = '<p>Unable to complete Jellyfin sign-in.</p>';
+    });
+  </script>
+</body>
+
+</html>

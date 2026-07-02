@@ -102,6 +102,21 @@ class ThrowAuthExceptionClass {
   NoServiceAccess(): never {
     throw createCustomException(AuthResponseCode.NO_SERVICE_ACCESS, 401);
   }
+
+  UserAlreadyHasAccess(): never {
+    throw createCustomException(AuthResponseCode.USER_ALREADY_HAS_ACCESS, 409);
+  }
+
+  UserDoesNotHaveAccess(): never {
+    throw createCustomException(
+      AuthResponseCode.USER_DOES_NOT_HAVE_ACCESS,
+      409,
+    );
+  }
+
+  CannotDeleteSelf(): never {
+    throw createCustomException(AuthResponseCode.CANNOT_DELETE_SELF, 409);
+  }
 }
 
 export const throwException = new ThrowAuthExceptionClass();

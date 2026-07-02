@@ -93,9 +93,7 @@ export class SupportService {
         } catch (err) {
           const error = err as AxiosError;
           const reason = error.message || 'unknown error';
-          this.logger.warn(
-            `Failed to check ${service} at ${url}: ${reason}`,
-          );
+          this.logger.warn(`Failed to check ${service} at ${url}: ${reason}`);
           return [service, false] as const;
         }
       }),
@@ -105,7 +103,9 @@ export class SupportService {
   }
 
   async checkServiceAccess(req: any, serviceName: string): Promise<boolean> {
-    const user = await this.usersService.getUserById(req.session?.passport?.user);
+    const user = await this.usersService.getUserById(
+      req.session?.passport?.user,
+    );
     return user.allowedServices.includes(serviceName);
   }
 }

@@ -1,46 +1,109 @@
-<div class="glass-card">
-  <h2>Add New User</h2>
-  <form (ngSubmit)="onSubmit()" #userForm="ngForm" >
+<div class="mode-menu">
+  <button
+    type="button"
+    class="mode-button"
+    [ngClass]="{ active: mode === 'create' }"
+    (click)="setMode('create')"
+  >
+    {{ 'ADMIN.CREATE_MODE' | translate }}
+  </button>
+  <button
+    type="button"
+    class="mode-button"
+    [ngClass]="{ active: mode === 'delete' }"
+    (click)="setMode('delete')"
+  >
+    {{ 'ADMIN.DELETE_MODE' | translate }}
+  </button>
+</div>
+
+<!-- Create user window -->
+<div class="glass-card" *ngIf="mode === 'create'">
+  <h2>{{ 'ADMIN.ADD_USER_TITLE' | translate }}</h2>
+  <form (ngSubmit)="onSubmit()" #userForm="ngForm">
     <div class="form-group">
-      <label>Username:</label>
+      <label>{{ 'ADMIN.USERNAME' | translate }}:</label>
       <input type="text" [(ngModel)]="username" name="username" required>
     </div>
+
     <div class="form-group">
-      <label>Password:</label>
+      <label>{{ 'ADMIN.PASSWORD' | translate }}:</label>
       <input type="password" [(ngModel)]="password" name="password" required>
     </div>
+
     <div class="form-group">
-      <label>Email:</label>
+      <label>{{ 'ADMIN.CONFIRM_PASSWORD' | translate }}:</label>
+      <input type="password" [(ngModel)]="confirmPassword" name="confirmPassword" required>
+      <p class="hint error-hint" *ngIf="confirmPassword && !passwordsMatch()">
+        {{ 'ADMIN.PASSWORDS_DONT_MATCH' | translate }}
+      </p>
+    </div>
+
+    <div class="form-group">
+      <label>{{ 'ADMIN.EMAIL' | translate }}:</label>
       <input type="email" [(ngModel)]="email" name="email" required>
     </div>
+
     <div class="form-group">
-      <label>User Type:</label>
-      <select [(ngModel)]="usertype" name="usertype" required>
-        <option value="user">User</option>
-        <option value="admin">Admin</option>
-      </select>
+      <label>{{ 'ADMIN.USER_TYPE' | translate }}:</label>
+      <div class="segmented" role="radiogroup">
+        <button type="button" class="segment" role="radio"
+          [class.active]="usertype === 'user'" [attr.aria-checked]="usertype === 'user'"
+          (click)="usertype = 'user'">
+          {{ 'ADMIN.USER_TYPE_USER' | translate }}
+        </button>
+        <button type="button" class="segment" role="radio"
+          [class.active]="usertype === 'admin'" [attr.aria-checked]="usertype === 'admin'"
+          (click)="usertype = 'admin'">
+          {{ 'ADMIN.USER_TYPE_ADMIN' | translate }}
+        </button>
+      </div>
     </div>
-   <div class="form-group">
-    <label>Allowed Services:</label>
-    <div class="checkbox-list">
-        <label>
-            <input type="checkbox" [(ngModel)]="allowedServices.jellyfin" name="allowedServices" value="jellyfin">
-            jellyfin
+
+    <div class="form-group">
+      <label>{{ 'ADMIN.ALLOWED_SERVICES' | translate }}:</label>
+      <div class="checkbox-list">
+        <label *ngFor="let service of services" class="checkbox-item">
+          <input type="checkbox" [(ngModel)]="selectedServices[service.name]" [name]="'svc-' + service.name">
+          {{ service.label }}
         </label>
-        <label>
-            <input type="checkbox" [(ngModel)]="allowedServices.nextcloud" name="allowedServices" value="nextcloud">
-            nextcloud
-        </label>
-        <label>
-            <input type="checkbox" [(ngModel)]="allowedServices.radarr" name="allowedServices" value="radarr">
-            radarr
-        </label>
-        <label>
-            <input type="checkbox" [(ngModel)]="allowedServices.sonarr" name="allowedServices" value="sonarr">
-            sonarr
-        </label>
+      </div>
+      <p class="hint" *ngIf="services.length === 0">{{ 'ADMIN.NO_SERVICES_AVAILABLE' | translate }}</p>
     </div>
-</div>
-    <button type="submit" [disabled]="!userForm.form.valid">Create User</button>
+
+    <button type="submit" [disabled]="!userForm.form.valid || !passwordsMatch()">
+      {{ 'ADMIN.CREATE_USER' | translate }}
+    </button>
   </form>
 </div>
+
+<!-- Delete user window -->
+<div class="glass-card" *ngIf="mode === 'delete'">
+  <h2>{{ 'ADMIN.DELETE_USER_TITLE' | translate }}</h2>
+  <form (ngSubmit)="onSubmit()" #deleteForm="ngForm">
+    <div class="form-group">
+      <label>{{ 'ADMIN.SELECT_USER_TO_DELETE' | translate }}:</label>
+      <select [(ngModel)]="targetUser" name="targetUser" required>
+        <option value="" disabled selected>{{ 'ADMIN.SELECT_USER' | translate }}</option>
+        <option *ngFor="let user of users" [value]="user.username">
+          {{ user.username }} — {{ roleLabelKey(user.userType) | translate }}
+        </option>
+      </select>
+      <p class="hint" *ngIf="users.length === 0">{{ 'ADMIN.NO_USERS_TO_DELETE' | translate }}</p>
+      <p class="hint warning-hint" *ngIf="selectedUser">
+        {{ 'ADMIN.DELETE_USER_WARNING' | translate }}
+      </p>
+    </div>
+
+    <button type="submit" class="danger" [disabled]="!deleteForm.form.valid">
+      {{ 'ADMIN.DELETE_USER' | translate }}
+    </button>
+  </form>
+</div>
+
+<app-confirm-dialog
+  [open]="confirmOpen"
+  [message]="(mode === 'create' ? 'ADMIN.CONFIRM_CREATE_USER' : 'ADMIN.CONFIRM_DELETE_USER') | translate"
+  (confirm)="onConfirm()"
+  (cancel)="onCancelConfirm()"
+></app-confirm-dialog>

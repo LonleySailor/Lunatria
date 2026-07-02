@@ -32,5 +32,6 @@ import { AuthService } from 'src/auth/auth.service';
     SonarrController,
   ],
   providers: [ProxyService, JellyfinService, RadarrService, SonarrService,AuthService],
+  exports: [JellyfinService],
 })
 export class ProxyModule {}
