@@ -229,6 +229,78 @@ export class JellyfinService {
         '/admin/revoke',
       );
       throw new Error(`Failed to delete Jellyfin user: ${errorMessage}`);
+  async authenticateForApp(
+    userId: string,
+  ): Promise<any> {
+    const creds = await this.credentialsService.getCredential(
+      userId,
+      'jellyfin',
+    );
+    if (!creds?.username || !creds?.password) {
+      await this.auditService.log(
+        userId,
+        'jellyfin',
+        'fail',
+        'No stored Jellyfin credentials found',
+        '/app-auth',
+      );
+      throw new Error('No stored Jellyfin credentials found for this user');
+    }
+
+    try {
+      const res = await this.http.axiosRef.post(
+        `${this.getBaseUrl()}/Users/AuthenticateByName`,
+        {
+          Username: creds?.username,
+          Pw: creds?.password,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Emby-Authorization':
+              'MediaBrowser Client="Starlight", Device="Server", DeviceId="unique-id-123", Version="1.0.0"',
+          },
+        },
+      );
+
+      if (
+        !res.data?.AccessToken ||
+        !res.data?.ServerId ||
+        !res.data?.User?.Id
+      ) {
+        await this.auditService.log(
+          userId,
+          'jellyfin',
+          'fail',
+          'No access token, server id or user id received from Jellyfin',
+          '/app-auth',
+        );
+        throw new Error(
+          'No access token, server id or user id received from Jellyfin',
+        );
+      }
+
+      await this.auditService.log(
+        userId,
+        'jellyfin',
+        'success',
+        'App authentication successful',
+        '/app-auth',
+      );
+      // Return the full response for the app
+      return res.data;
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message;
+      await this.auditService.log(
+        userId,
+        'jellyfin',
+        'fail',
+        `App authentication failed: ${errorMessage}`,
+        '/app-auth',
+      );
+      throw new Error(
+        `Failed to authenticate with Jellyfin: ${errorMessage}`,
+      );
     }
   }
 
