@@ -41,6 +41,32 @@ export class UsersController {
   ) {
     this.redis = redis;
   }
+
+  
+  private serviceCookieOptions() {
+    return {
+      domain: `.${this.configService.getDomainName()}`,
+      path: SERVICES_CONSTANTS.COOKIES.PATH,
+      secure: SERVICES_CONSTANTS.COOKIES.SECURE,
+      sameSite: SERVICES_CONSTANTS.COOKIES.SAME_SITE_NONE,
+    };
+  }
+
+  
+  private async purgeServiceTokens(userId?: string): Promise<void> {
+    if (!userId) return;
+    const services = [
+      SERVICES_CONSTANTS.SERVICES.JELLYFIN,
+      SERVICES_CONSTANTS.SERVICES.RADARR,
+      SERVICES_CONSTANTS.SERVICES.SONARR,
+    ];
+    const keys = services.flatMap((service) => [
+      `${service}:token:${userId}`,
+      `${service}:cookie:${userId}`,
+    ]);
+    await this.redis.del(...keys);
+  }
+
   @UseGuards(AdminGuard)
   @Post(AUTH_CONSTANTS.ENDPOINTS.REGISTER)
   async addUser(
@@ -97,18 +123,23 @@ export class UsersController {
 
   @Get(AUTH_CONSTANTS.ENDPOINTS.LOGOUT)
   async logout(@Req() req: any, @Res() res: Response): Promise<any> {
+   
+    const userId = req.session?.passport?.user;
+    await this.purgeServiceTokens(userId);
+
     return new Promise((resolve, reject) => {
       req.session.destroy((err) => {
         if (err) {
           reject(err);
         } else {
-          this.configService.getDomainName();
           const domain = this.configService.getDomainName();
+          const serviceCookieOptions = this.serviceCookieOptions();
           res
-            .clearCookie(APP_CONSTANTS.SESSION_NAME, {
-              domain: domain,
-              path: '/',
-            })
+            .clearCookie(APP_CONSTANTS.SESSION_NAME, { domain, path: '/' })
+            
+            .clearCookie(SERVICES_CONSTANTS.COOKIES.JELLYFIN, serviceCookieOptions)
+            .clearCookie(SERVICES_CONSTANTS.COOKIES.RADARR, serviceCookieOptions)
+            .clearCookie(SERVICES_CONSTANTS.COOKIES.SONARR, serviceCookieOptions)
             .status(200)
             .json({ message: 'Logged out' });
           resolve(null);
@@ -117,78 +148,41 @@ export class UsersController {
     });
   }
 
+  
   @Get(AUTH_CONSTANTS.ENDPOINTS.LOGOUT_JELLYFIN)
   async logoutJellyfin(@Req() req: any, @Res() res: Response): Promise<any> {
-    const userId = req.session.passport.user;
-    const redisKey = `jellyfin:token:${userId}`;
-    await this.redis.del(redisKey);
-    const redisRadarrKey = `radarr:cookie:${userId}`;
-    await this.redis.del(redisRadarrKey);
-    return new Promise((resolve, reject) => {
-      req.session.destroy((err) => {
-        if (err) {
-          reject(err);
-        } else {
-          const domain = this.configService.getDomainName();
-          res
-            .clearCookie(SERVICES_CONSTANTS.COOKIES.JELLYFIN, {
-              domain: domain,
-              path: SERVICES_CONSTANTS.COOKIES.PATH,
-              secure: SERVICES_CONSTANTS.COOKIES.SECURE,
-              sameSite: SERVICES_CONSTANTS.COOKIES.SAME_SITE_NONE,
-            })
-            .status(200)
-            .json({ message: 'Logged out' });
-          resolve(null);
-        }
-      });
-    });
+    const userId = req.session?.passport?.user;
+    if (userId) {
+      await this.redis.del(`${SERVICES_CONSTANTS.SERVICES.JELLYFIN}:token:${userId}`);
+    }
+    res
+      .clearCookie(SERVICES_CONSTANTS.COOKIES.JELLYFIN, this.serviceCookieOptions())
+      .status(200)
+      .json({ message: 'Logged out' });
   }
 
   @Get(AUTH_CONSTANTS.ENDPOINTS.LOGOUT_RADARR)
   async logoutRadarr(@Req() req: any, @Res() res: Response): Promise<any> {
-    return new Promise((resolve, reject) => {
-      req.session.destroy((err) => {
-        if (err) {
-          reject(err);
-        } else {
-          const domain = this.configService.getDomainName();
-          res
-            .clearCookie(SERVICES_CONSTANTS.COOKIES.RADARR, {
-              domain: domain,
-              path: SERVICES_CONSTANTS.COOKIES.PATH,
-              secure: SERVICES_CONSTANTS.COOKIES.SECURE,
-              sameSite: SERVICES_CONSTANTS.COOKIES.SAME_SITE_NONE,
-            })
-            .status(200)
-            .json({ message: 'Logged out' });
-          resolve(null);
-        }
-      });
-    });
+    const userId = req.session?.passport?.user;
+    if (userId) {
+      await this.redis.del(`${SERVICES_CONSTANTS.SERVICES.RADARR}:cookie:${userId}`);
+    }
+    res
+      .clearCookie(SERVICES_CONSTANTS.COOKIES.RADARR, this.serviceCookieOptions())
+      .status(200)
+      .json({ message: 'Logged out' });
   }
 
   @Get(AUTH_CONSTANTS.ENDPOINTS.LOGOUT_SONARR)
   async logoutSonarr(@Req() req: any, @Res() res: Response): Promise<any> {
-    return new Promise((resolve, reject) => {
-      req.session.destroy((err) => {
-        if (err) {
-          reject(err);
-        } else {
-          const domain = this.configService.getDomainName();
-          res
-            .clearCookie(SERVICES_CONSTANTS.COOKIES.SONARR, {
-              domain: domain,
-              path: SERVICES_CONSTANTS.COOKIES.PATH,
-              secure: SERVICES_CONSTANTS.COOKIES.SECURE,
-              sameSite: SERVICES_CONSTANTS.COOKIES.SAME_SITE_NONE,
-            })
-            .status(200)
-            .json({ message: 'Logged out' });
-          resolve(null);
-        }
-      });
-    });
+    const userId = req.session?.passport?.user;
+    if (userId) {
+      await this.redis.del(`${SERVICES_CONSTANTS.SERVICES.SONARR}:cookie:${userId}`);
+    }
+    res
+      .clearCookie(SERVICES_CONSTANTS.COOKIES.SONARR, this.serviceCookieOptions())
+      .status(200)
+      .json({ message: 'Logged out' });
   }
   @UseGuards(AuthenticatedGuard)
   @Delete(AUTH_CONSTANTS.ENDPOINTS.DELETE_USER)

@@ -96,8 +96,14 @@ export class JellyfinService {
         '/auth',
       );
       return dataToCache;
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || error.message;
+    } catch (error: unknown) {
+      const errorMessage =
+        (error as {
+          response?: { data?: { message?: string } };
+          message?: string;
+        }).response?.data?.message ||
+        (error as { message?: string }).message ||
+        'Unknown error';
       await this.auditService.log(
         userId,
         'jellyfin',
@@ -155,7 +161,7 @@ export class JellyfinService {
         `Created Jellyfin user "${name}"`,
         '/admin/register',
       );
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage = error.response?.data?.message || error.message;
       await this.auditService.log(
         adminUserId,
@@ -219,7 +225,7 @@ export class JellyfinService {
         `Deleted Jellyfin user "${name}"`,
         '/admin/revoke',
       );
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage = error.response?.data?.message || error.message;
       await this.auditService.log(
         adminUserId,
@@ -229,6 +235,8 @@ export class JellyfinService {
         '/admin/revoke',
       );
       throw new Error(`Failed to delete Jellyfin user: ${errorMessage}`);
+    }
+  }
   async authenticateForApp(
     userId: string,
   ): Promise<any> {
@@ -289,8 +297,14 @@ export class JellyfinService {
       );
       // Return the full response for the app
       return res.data;
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || error.message;
+    } catch (error: unknown) {
+      const errorMessage =
+        (error as {
+          response?: { data?: { message?: string } };
+          message?: string;
+        }).response?.data?.message ||
+        (error as { message?: string }).message ||
+        'Unknown error';
       await this.auditService.log(
         userId,
         'jellyfin',

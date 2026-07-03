@@ -1,0 +1,82 @@
+
+upstream lunatria_backend_upstream {
+    server 192.168.33.54:3000;   # Lunatria NestJS backend
+}
+
+upstream jellyfin_media_upstream {
+    server 192.168.33.36:8096;   # Jellyfin media server
+}
+
+map $http_cookie $is_authenticated {
+    default 0;
+    ~*jellyfin_auth=true 1;
+}
+
+server {
+    listen 80;
+    server_name jellyfin.domain.com;    
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+    }
+
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name jellyfin.ldomain.com;
+
+    ssl_certificate cert goes here; 
+    ssl_certificate_key cert key goes here;
+
+    # Base URL of the Lunatria portal (used for the unauthorized redirect).
+    set $portal_base_url https://domain.com;
+
+    location = /jellyfin-logout {
+        proxy_pass http://lunatria_backend_upstream/jellyfin-logout.html;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location / {
+        error_page 401 = @handle_unauth;
+
+        if ($is_authenticated) {
+            proxy_pass http://jellyfin_media_upstream;
+        }
+
+        # If not authenticated, proxy to the backend for handling
+        proxy_pass http://lunatria_backend_upstream/jellyfin/;
+        proxy_intercept_errors on;
+        proxy_http_version 1.1;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location @handle_unauth {
+        return 302 $portal_base_url/unauthorized?source=jellyfin;
+    }
+
+    location = /jellyfin-login-bridge.html {
+        proxy_pass http://lunatria_backend_upstream/jellyfin-login-bridge.html;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+# ---------------------------------------------------------------------------
+# Sourcing these values from .env (optional, deploy-time templating):
+#
+#     before running replace these values with  placeholders, e.g.
+#          upstream lunatria_backend_upstream { server ${BACKEND_ADDR}; }
+#          upstream jellyfin_media_upstream   { server ${JELLYFIN_ADDR}; }
+#          set $portal_base_url ${PORTAL_BASE_URL};
+#      (server_name / cert paths would use ${JELLYFIN_DOMAIN}).
+# --------------------------

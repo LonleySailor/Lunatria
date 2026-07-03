@@ -1,4 +1,13 @@
-import { Controller, All, Req, Res, UseGuards, Post, Body } from '@nestjs/common';
+import {
+  Controller,
+  All,
+  Req,
+  Res,
+  UseGuards,
+  Post,
+  Body,
+  Get,
+} from '@nestjs/common';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { Response } from 'express';
 import { ServiceAccessGuard } from 'src/auth/guards/service.access.guard';
@@ -49,6 +58,26 @@ export class JellyfinController {
 
   @Service(SERVICES_CONSTANTS.SERVICES.JELLYFIN)
   @UseGuards(ServiceAccessGuard)
+  @Get(SERVICES_CONSTANTS.JELLYFIN.ENDPOINT_GET_AUTH_DATA)
+  async getAuthData(@Req() req: any, @Res() res: Response) {
+    const userToAuthId = req.session.passport.user;
+    const jellyfinAuthData = await this.jellyfinService.getJellyfinToken(
+      userToAuthId,
+    );
+
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    // Inject the public server address from config (JELLYFIN_PUBLIC_URL / DOMAIN)
+    // so the login bridge does not have to hardcode a hostname.
+    res.json({
+      ...jellyfinAuthData,
+      serverAddress: this.configService.getJellyfinPublicUrl(),
+    });
+  }
+
+  @Service(SERVICES_CONSTANTS.SERVICES.JELLYFIN)
+  @UseGuards(ServiceAccessGuard)
   @All('*')
   async proxy(@Req() req: any, @Res() res: Response) {
     const userToAuthId = req.session.passport.user;
@@ -57,8 +86,7 @@ export class JellyfinController {
     const jellyfinPublicUrl = this.configService.getJellyfinPublicUrl();
 
     if (!req.cookies[SERVICES_CONSTANTS.COOKIES.JELLYFIN]) {
-      const { accessToken, userId, serverId } =
-        await this.jellyfinService.getJellyfinToken(userToAuthId);
+      await this.jellyfinService.getJellyfinToken(userToAuthId);
 
       res.cookie(SERVICES_CONSTANTS.COOKIES.JELLYFIN, 'true', {
         httpOnly: SERVICES_CONSTANTS.COOKIES.HTTP_ONLY,
@@ -69,10 +97,8 @@ export class JellyfinController {
         path: SERVICES_CONSTANTS.COOKIES.PATH,
       });
 
-      // Redirect to the SSO bridge with token
-      res.redirect(
-        `${jellyfinPublicUrl}/sso-bridge.html?token=${accessToken}&userId=${userId}&serverId=${serverId}`,
-      );
+      // Redirect to the Jellyfin login bridge without exposing auth data in the URL
+      res.redirect(`${jellyfinPublicUrl}/jellyfin-login-bridge.html`);
       return;
     }
   }

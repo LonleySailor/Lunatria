@@ -30,6 +30,7 @@ export const SERVICES_CONSTANTS = {
   JELLYFIN: {
     ENDPOINT_AUTH: '/Users/AuthenticateByName',
     ENDPOINT_APP_AUTH: 'app-auth',
+    ENDPOINT_GET_AUTH_DATA: 'get-auth-data',
     AUTH_HEADER: 'X-Emby-Authorization',
     TOKEN_HEADER: 'X-Emby-Token',
     ROUTER_PREFIX: 'jellyfin',
