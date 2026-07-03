@@ -1,9 +1,10 @@
 import { Controller, All, Req, Res, UseGuards, Post, Body } from '@nestjs/common';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { Response } from 'express';
 import { ServiceAccessGuard } from 'src/auth/guards/service.access.guard';
 import { Service } from 'src/auth/decorators/service.decorator';
 import { JellyfinService } from './jellyfin.service';
-import { SERVICES_CONSTANTS } from 'src/config/constants';
+import { AUTH_CONSTANTS, SERVICES_CONSTANTS } from 'src/config/constants';
 import { ConfigService } from 'src/config/config.service';
 import { AuthService } from 'src/auth/auth.service';
 import { throwException } from 'src/responseStatus/auth.response';
@@ -16,18 +17,26 @@ export class JellyfinController {
     private readonly authService: AuthService,
   ) {}
 
+  @Throttle({
+    default: {
+      ttl: AUTH_CONSTANTS.RATE_LIMIT.AUTH.TTL_MS,
+      limit: AUTH_CONSTANTS.RATE_LIMIT.AUTH.LIMIT,
+    },
+  })
+  @UseGuards(ThrottlerGuard)
   @Post(SERVICES_CONSTANTS.JELLYFIN.ENDPOINT_APP_AUTH)
   async appAuth(
     @Body() body: { Username: string; Pw: string },
     @Res() res: Response,
   ) {
-    // Validate Lunatria credentials (throws if user not found or invalid)
+    // Validate Lunatria credentials
     const validatedUser = await this.authService.validateUser(
       body.Username,
       body.Pw,
     );
     if (!validatedUser) {
-      throwException.IncorrectPassword();
+      // Generic failure — do not reveal whether the username exists.
+      throwException.InvalidCredentials();
     }
 
     // Get full Jellyfin auth response using user's stored credentials

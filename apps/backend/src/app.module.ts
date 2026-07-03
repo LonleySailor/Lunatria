@@ -1,5 +1,7 @@
 import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { AUTH_CONSTANTS } from './config/constants';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { SessionsModule } from './sessions/sessions.module';
@@ -15,6 +17,14 @@ import { ConfigService } from './config/config.service';
 @Module({
   imports: [
     ConfigModule,
+    // Applied only where explicitly guarded (login, jellyfin app-auth) via
+    // ThrottlerGuard — this registers the default limits/in-memory storage.
+    ThrottlerModule.forRoot([
+      {
+        ttl: AUTH_CONSTANTS.RATE_LIMIT.AUTH.TTL_MS,
+        limit: AUTH_CONSTANTS.RATE_LIMIT.AUTH.LIMIT,
+      },
+    ]),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

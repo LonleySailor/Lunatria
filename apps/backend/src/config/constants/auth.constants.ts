@@ -70,6 +70,14 @@ export const AUTH_CONSTANTS = {
   // Bcrypt
   BCRYPT_ROUNDS: 10,
 
+  // Rate limiting for credential-checking endpoints (login, app-auth)
+  RATE_LIMIT: {
+    AUTH: {
+      TTL_MS: 60000,
+      LIMIT: 5,
+    },
+  } as const,
+
   // Encryption
   ENCRYPTION: {
     ALGORITHM: 'aes-256-cbc' as const,

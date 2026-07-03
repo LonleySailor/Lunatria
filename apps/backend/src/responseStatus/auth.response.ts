@@ -14,6 +14,12 @@ class ThrowAuthExceptionClass {
     throw createCustomException(AuthResponseCode.INCORRECT_PASSWORD, 401);
   }
 
+  // Generic credential failure used by login/app-auth so an attacker cannot
+  // distinguish "no such user" from "wrong password" (account enumeration).
+  InvalidCredentials(): never {
+    throw createCustomException(AuthResponseCode.INVALID_CREDENTIALS, 401);
+  }
+
   InvalidVerificationCode(): never {
     throw createCustomException(
       AuthResponseCode.INVALID_VERIFICATION_CODE,

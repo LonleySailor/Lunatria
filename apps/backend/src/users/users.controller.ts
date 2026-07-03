@@ -18,6 +18,7 @@ import { AuthenticatedGuard } from 'src/auth/guards/authenticated.guard';
 import { LocalAuthGuard } from 'src/auth/guards/local.auth.guard';
 import { Response } from 'express';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import Redis from 'ioredis';
 import { ConfigService } from 'src/config/config.service';
 import {
@@ -69,7 +70,13 @@ export class UsersController {
     return user;
   }
 
-  @UseGuards(LocalAuthGuard)
+  @Throttle({
+    default: {
+      ttl: AUTH_CONSTANTS.RATE_LIMIT.AUTH.TTL_MS,
+      limit: AUTH_CONSTANTS.RATE_LIMIT.AUTH.LIMIT,
+    },
+  })
+  @UseGuards(ThrottlerGuard, LocalAuthGuard)
   @Post(AUTH_CONSTANTS.ENDPOINTS.LOGIN)
   async login(
     @Request() req,

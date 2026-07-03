@@ -3,6 +3,13 @@ import { AuthService } from './auth.service';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
 
+jest.mock('bcrypt', () => ({
+  hashSync: jest.fn(() => '$2b$10$dummydummydummydummydummydummydummydummydu'),
+  compare: jest.fn(),
+}));
+
+const mockCompare = bcrypt.compare as jest.Mock;
+
 describe('AuthService', () => {
   let service: AuthService;
   let usersService: UsersService;
@@ -44,21 +51,18 @@ describe('AuthService', () => {
 
   describe('validateUser', () => {
     it('should return userId on successful validation', async () => {
-      jest.spyOn(bcrypt, 'compare').mockResolvedValueOnce(true as never);
+      mockCompare.mockResolvedValueOnce(true);
       mockUsersService.getUser.mockResolvedValueOnce(mockUser);
 
       const result = await service.validateUser('testuser', 'password');
 
       expect(result).toEqual({ userId: mockUser.id });
       expect(usersService.getUser).toHaveBeenCalledWith('testuser');
-      expect(bcrypt.compare).toHaveBeenCalledWith(
-        'password',
-        mockUser.password,
-      );
+      expect(mockCompare).toHaveBeenCalledWith('password', mockUser.password);
     });
 
     it('should return null on incorrect password', async () => {
-      jest.spyOn(bcrypt, 'compare').mockResolvedValueOnce(false as never);
+      mockCompare.mockResolvedValueOnce(false);
       mockUsersService.getUser.mockResolvedValueOnce(mockUser);
 
       const result = await service.validateUser('testuser', 'wrongpassword');
@@ -67,14 +71,18 @@ describe('AuthService', () => {
       expect(usersService.getUser).toHaveBeenCalledWith('testuser');
     });
 
-    it('should throw exception when user not found', async () => {
+    it('should return null when user not found (no enumeration)', async () => {
+      mockCompare.mockResolvedValueOnce(false);
       mockUsersService.getUser.mockResolvedValueOnce(null);
 
-      // The service checks if user exists after getUser but before password validation
-      // This test verifies the error handling path
-      await expect(
-        service.validateUser('nonexistent', 'password'),
-      ).rejects.toThrow();
+      // Missing user and wrong password must be indistinguishable: both return
+      // null so callers surface a single generic InvalidCredentials error.
+      const result = await service.validateUser('nonexistent', 'password');
+
+      expect(result).toBeNull();
+      // A bcrypt.compare still runs (against a dummy hash) so response timing
+      // does not reveal whether the account exists.
+      expect(mockCompare).toHaveBeenCalled();
     });
   });
 });
