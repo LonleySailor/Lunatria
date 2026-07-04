@@ -3,11 +3,9 @@ import * as bcrypt from 'bcrypt';
 import { userSchema } from '../src/users/users.schema';
 const usersModel = mongoose.model('user', userSchema);
 
-const MONGO_PORT = process.env.MONGO_PORT || '27018';
-const MONGO_HOST = process.env.MONGO_HOST || 'localhost';
-const MONGO_DB = 'nest';
 
-const mongoUri = `mongodb://${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}`;
+
+const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/nest';
 
 async function createAdmin() {
     try {
