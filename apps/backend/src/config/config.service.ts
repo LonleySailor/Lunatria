@@ -27,7 +27,7 @@ export class ConfigService {
   // ============ Redis ============
   getRedisUrl(): string {
     return process.env.REDIS_URL || 'redis://127.0.0.1:6380';
-  }
+  }s
 
   // ============ Domain & Networking ============
   /**
@@ -178,36 +178,24 @@ export class ConfigService {
     return url;
   }
 
-  // ============ Single-user service credentials (shared, from env) ============
-  /**
-   * Static shared Radarr credentials used to auto-register users.
-   * Radarr is single-user, so every Lunatria user proxies through these.
-   */
+
   getRadarrServiceCredentials(): {
     username: string;
     password: string;
-    apiKey: string;
   } {
     return {
       username: process.env.RADARR_USERNAME || '',
       password: process.env.RADARR_PASSWORD || '',
-      apiKey: process.env.RADARR_API_KEY || '',
     };
   }
 
-  /**
-   * Static shared Sonarr credentials used to auto-register users.
-   * Sonarr is single-user, so every Lunatria user proxies through these.
-   */
   getSonarrServiceCredentials(): {
     username: string;
     password: string;
-    apiKey: string;
   } {
     return {
       username: process.env.SONARR_USERNAME || '',
       password: process.env.SONARR_PASSWORD || '',
-      apiKey: process.env.SONARR_API_KEY || '',
     };
   }
 }

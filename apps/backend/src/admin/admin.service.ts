@@ -38,12 +38,10 @@ export class AdminService {
     private readonly sessionsService: SessionsService,
   ) {}
 
-  /** Services available for SSO / auto-registration (static config). */
   getSsoServices() {
     return SSO_SERVICES;
   }
 
-  /** Users that do not yet have a stored credential for the given service. */
   async getUsersWithoutCredential(service: string) {
     const [users, userIdsWithCred] = await Promise.all([
       this.usersService.getAllUsers(),
@@ -59,7 +57,6 @@ export class AdminService {
       }));
   }
 
-  /** Users that currently have a stored credential for the given service. */
   async getUsersWithCredential(service: string) {
     const [users, userIdsWithCred] = await Promise.all([
       this.usersService.getAllUsers(),
@@ -75,11 +72,7 @@ export class AdminService {
       }));
   }
 
-  /**
-   * Users that do not have access (allowedServices) to the given service.
-   * Includes admins (flagged via userType) and notes whether each user already
-   * has stored credentials for the service, so the UI can warn when missing.
-   */
+
   async getUsersWithoutAccess(service: string) {
     const [users, userIdsWithCred] = await Promise.all([
       this.usersService.getAllUsers(),
@@ -97,10 +90,6 @@ export class AdminService {
       }));
   }
 
-  /**
-   * Users that currently have access (allowedServices) to the given service.
-   * Mirror of getUsersWithoutAccess, used by the revoke flow.
-   */
   async getUsersWithAccess(service: string) {
     const [users, userIdsWithCred] = await Promise.all([
       this.usersService.getAllUsers(),
@@ -118,10 +107,7 @@ export class AdminService {
       }));
   }
 
-  /**
-   * Grant a user access to a service by adding it to their allowedServices[].
-   * Does not touch credentials (the two axes are managed independently).
-   */
+  
   async grantAccess(body: GrantAccessBody) {
     const { service, targetUser } = body;
     const user = await this.usersService.getUser(targetUser);
@@ -133,10 +119,7 @@ export class AdminService {
     return { success: true, service, targetUser };
   }
 
-  /**
-   * Revoke a user's access to a service by removing it from allowedServices[].
-   * Does not touch credentials (the two axes are managed independently).
-   */
+ 
   async revokeAccess(body: GrantAccessBody) {
     const { service, targetUser } = body;
     const user = await this.usersService.getUser(targetUser);
@@ -148,11 +131,7 @@ export class AdminService {
     return { success: true, service, targetUser };
   }
 
-  /**
-   * Register a credential for a user. When autoRegister is enabled (default),
-   * the backend provisions the account in the target service; otherwise the
-   * admin-provided credentials are stored verbatim (manual fallback).
-   */
+  
   async registerCredential(body: RegisterCredentialBody, adminUserId: string) {
     const { service, targetUser, autoRegister, username, password, email } =
       body;
@@ -202,13 +181,7 @@ export class AdminService {
     return { success: true, service, targetUser };
   }
 
-  /**
-   * Revoke a user's stored credential for a service. For Jellyfin this also
-   * deletes the real account (inverse of creation); Radarr/Sonarr share a
-   * static account so only the stored credential is removed. The cached proxy
-   * token/cookie is cleared so access stops immediately. Access
-   * (allowedServices) is left untouched.
-   */
+
   async revokeCredential(body: GrantAccessBody, adminUserId: string) {
     const { service, targetUser } = body;
 
@@ -223,13 +196,7 @@ export class AdminService {
     return { success: true, service, targetUser };
   }
 
-  /**
-   * Tear down a single stored credential: for Jellyfin delete the real account
-   * (inverse of creation), then delete the stored credential and clear the
-   * cached proxy token/cookie so access stops immediately. No-op if there is no
-   * stored credential for the service. A Jellyfin deletion failure aborts.
-   * Callers that already loaded the credential can pass it to avoid a re-fetch.
-   */
+ 
   private async cleanupServiceCredential(
     userId: string,
     service: string,
@@ -244,7 +211,7 @@ export class AdminService {
     if (service === SERVICES_CONSTANTS.SERVICES.JELLYFIN) {
       try {
         await this.jellyfinService.deleteUser(adminUserId, cred.username);
-      } catch (error) {
+      } catch (error:any) {
         throwCredentialsException.JellyfinUserDeletionFailed(error.message);
       }
     }
@@ -305,7 +272,7 @@ export class AdminService {
     const password = generateRandomPassword(JELLYFIN_PASSWORD_LENGTH);
     try {
       await this.jellyfinService.createUser(adminUserId, username, password);
-    } catch (error) {
+    } catch (error:any) {
       throwCredentialsException.JellyfinUserCreationFailed(error.message);
     }
     await this.credentialsService.setCredential(
@@ -315,14 +282,11 @@ export class AdminService {
     );
   }
 
-  /**
-   * Radarr/Sonarr are single-user: store the shared credentials from env so
-   * the proxy can log in. No external account creation is needed.
-   */
+  
   private async registerStaticService(
     userId: string,
     service: string,
-    creds: { username: string; password: string; apiKey: string },
+    creds: { username: string; password: string },
   ) {
     if (!creds.username || !creds.password) {
       throwCredentialsException.AdminServiceCredentialsMissing();
