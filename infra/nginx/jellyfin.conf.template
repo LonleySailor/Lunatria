@@ -1,3 +1,10 @@
+# Jellyfin test vhost: combined app/web routing
+# - App traffic (Ktor / Android WebView UA): straight to Jellyfin, except the
+#   login call which is intercepted and sent to the Lunatria SSO (app-auth).
+# - Web traffic: jellyfin_auth cookie gate — authenticated goes to Jellyfin,
+#   unauthenticated goes to the Lunatria backend (login bridge flow).
+
+# Web session flag: jellyfin_auth cookie is set by the Lunatria backend
 map $http_cookie $is_authenticated {
     default 0;
     ~*jellyfin_auth=true 1;
@@ -20,7 +27,8 @@ map "$is_ktor_client$is_android_webview" $is_mobile_app_bootstrap {
     11 1;
 }
 
-
+# Route decision: mobile app traffic and cookie-authenticated web traffic go
+# straight to Jellyfin; unauthenticated web traffic goes to the Lunatria backend.
 map "$is_mobile_app_bootstrap$is_authenticated" $goes_to_jellyfin {
     default 1;
     "00" 0;
@@ -130,7 +138,4 @@ server {
         }
         return 302 $portal_base_url/unauthorized?source=jellyfin;
     }
-
-    ssl_certificate ssl_certificate goes here;
-    ssl_certificate_key ssl_certificate_key goes here;
 }
