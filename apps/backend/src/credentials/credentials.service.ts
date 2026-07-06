@@ -34,4 +34,18 @@ export class CredentialsService {
   async deleteCredential(userId: string, service: string): Promise<void> {
     await this.credentialModel.deleteOne({ userId, service });
   }
+
+  /**
+   * Returns the userIds that already have a stored credential for a service.
+   */
+  async getUserIdsWithService(service: string): Promise<string[]> {
+    return this.credentialModel.find({ service }).distinct('userId');
+  }
+
+  /**
+   * Returns the services a given user has stored credentials for.
+   */
+  async getServicesForUser(userId: string): Promise<string[]> {
+    return this.credentialModel.find({ userId }).distinct('service');
+  }
 }

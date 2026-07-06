@@ -27,7 +27,7 @@ export class ConfigService {
   // ============ Redis ============
   getRedisUrl(): string {
     return process.env.REDIS_URL || 'redis://127.0.0.1:6380';
-  }
+  }s
 
   // ============ Domain & Networking ============
   /**
@@ -176,5 +176,26 @@ export class ConfigService {
       throw new Error('SONARR_BASE_URL environment variable not set');
     }
     return url;
+  }
+
+
+  getRadarrServiceCredentials(): {
+    username: string;
+    password: string;
+  } {
+    return {
+      username: process.env.RADARR_USERNAME || '',
+      password: process.env.RADARR_PASSWORD || '',
+    };
+  }
+
+  getSonarrServiceCredentials(): {
+    username: string;
+    password: string;
+  } {
+    return {
+      username: process.env.SONARR_USERNAME || '',
+      password: process.env.SONARR_PASSWORD || '',
+    };
   }
 }

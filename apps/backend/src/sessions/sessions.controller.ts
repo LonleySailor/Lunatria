@@ -16,7 +16,7 @@ export class SessionController {
     );
     throwSessionException.AllSessionsFetchedSuccessfully(sessions);
   }
-@UseGuards(AuthenticatedGuard)
+  @UseGuards(AuthenticatedGuard)
   @Get(AUTH_CONSTANTS.ENDPOINTS.CHECK_SESSION_ACTIVE)
   async checkIfSessionIsActive(@Request() req) {
     const isSessionActive = await this.sessionService.checkIfSessionIsActive(

@@ -12,7 +12,8 @@ Controllers:
 
 ## Jellyfin
 - Path: `ALL /*`
-- On first visit: generates Jellyfin token and redirects to `/sso-bridge.html` with query params (`token`, `userId`, `serverId`).
+- On first visit: sets the Jellyfin service cookie, redirects to `/jellyfin-login-bridge.html`, and the bridge page fetches `/jellyfin/get-auth-data` from the authenticated API to receive `accessToken`, `userId`, and `serverId`.
+- The auth-data endpoint is protected by `AuthenticatedGuard` and avoids exposing the token in the redirect URL.
 
 ## Radarr / Sonarr
 - Path: `ALL /*`

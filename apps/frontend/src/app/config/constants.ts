@@ -20,4 +20,18 @@ export const API_ENDPOINTS = {
     BASE: '/credentials',
     ADD: '/credentials/add',
   },
+  ADMIN: {
+    BASE: '/admin',
+    SERVICES: '/admin/services',
+    USERS_WITHOUT_CREDENTIAL: '/admin/users-without-credential',
+    REGISTER_CREDENTIAL: '/admin/register-credential',
+    USERS_WITHOUT_ACCESS: '/admin/users-without-access',
+    GRANT_ACCESS: '/admin/grant-access',
+    USERS_WITH_ACCESS: '/admin/users-with-access',
+    REVOKE_ACCESS: '/admin/revoke-access',
+    USERS_WITH_CREDENTIAL: '/admin/users-with-credential',
+    REVOKE_CREDENTIAL: '/admin/revoke-credential',
+    USERS: '/admin/users',
+    DELETE_USER: '/admin/delete-user',
+  },
 } as const;

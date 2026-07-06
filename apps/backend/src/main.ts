@@ -1,15 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import * as session from 'express-session';
-import * as passport from 'passport';
+import session from 'express-session';
+import passport from 'passport';
 import Redis from 'ioredis';
 import { CustomValidationPipe } from './responseStatus/pipeline/calendar.custompipeline.response';
 import { RedisStore } from 'connect-redis';
 import * as dotenv from 'dotenv';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
-import * as express from 'express';
-import * as cookieParser from 'cookie-parser';
+import express from 'express';
+import cookieParser from 'cookie-parser';
 import { ConfigService } from './config/config.service';
 import { APP_CONSTANTS } from './config/constants';
 

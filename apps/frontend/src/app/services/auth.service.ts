@@ -38,8 +38,8 @@ export class AuthService {
 
   async isUserAdmin(): Promise<boolean> {
     try {
-      const response = await this.api.get<{ isAdmin: boolean }>(API_ENDPOINTS.SUPPORT.IS_ADMIN);
-      if (response.isAdmin === false) {
+      const response = await this.api.get<{ responseCode: number }>(API_ENDPOINTS.SUPPORT.IS_ADMIN);
+      if (response.responseCode === 618) {
         return false;
       }
 

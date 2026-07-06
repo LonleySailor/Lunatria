@@ -1,0 +1,296 @@
+import { Inject, Injectable } from '@nestjs/common';
+import Redis from 'ioredis';
+import { UsersService } from 'src/users/users.service';
+import { CredentialsService } from 'src/credentials/credentials.service';
+import { JellyfinService } from 'src/proxy/jellyfin/jellyfin.service';
+import { ConfigService } from 'src/config/config.service';
+import { SSO_SERVICES, SERVICES_CONSTANTS } from 'src/config/constants';
+import { throwException } from 'src/responseStatus/auth.response';
+import { throwCredentialsException } from 'src/responseStatus/credentials.response';
+import { generateRandomPassword } from 'src/common/password.util';
+import { REDIS_CLIENT } from 'src/redis/redis.module';
+import { SessionsService } from 'src/sessions/sessions.service';
+
+export interface RegisterCredentialBody {
+  service: string;
+  targetUser: string;
+  autoRegister?: boolean;
+  username?: string;
+  password?: string;
+  email?: string;
+}
+
+export interface GrantAccessBody {
+  service: string;
+  targetUser: string;
+}
+
+const JELLYFIN_PASSWORD_LENGTH = 16;
+
+@Injectable()
+export class AdminService {
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly credentialsService: CredentialsService,
+    private readonly jellyfinService: JellyfinService,
+    private readonly configService: ConfigService,
+    @Inject(REDIS_CLIENT) private readonly redis: Redis,
+    private readonly sessionsService: SessionsService,
+  ) {}
+
+  getSsoServices() {
+    return SSO_SERVICES;
+  }
+
+  async getUsersWithoutCredential(service: string) {
+    const [users, userIdsWithCred] = await Promise.all([
+      this.usersService.getAllUsers(),
+      this.credentialsService.getUserIdsWithService(service),
+    ]);
+    const taken = new Set(userIdsWithCred.map((id) => id.toString()));
+    return users
+      .filter((u) => !taken.has(u._id.toString()))
+      .map((u) => ({
+        id: u._id.toString(),
+        username: u.username,
+        email: u.email,
+      }));
+  }
+
+  async getUsersWithCredential(service: string) {
+    const [users, userIdsWithCred] = await Promise.all([
+      this.usersService.getAllUsers(),
+      this.credentialsService.getUserIdsWithService(service),
+    ]);
+    const taken = new Set(userIdsWithCred.map((id) => id.toString()));
+    return users
+      .filter((u) => taken.has(u._id.toString()))
+      .map((u) => ({
+        id: u._id.toString(),
+        username: u.username,
+        email: u.email,
+      }));
+  }
+
+
+  async getUsersWithoutAccess(service: string) {
+    const [users, userIdsWithCred] = await Promise.all([
+      this.usersService.getAllUsers(),
+      this.credentialsService.getUserIdsWithService(service),
+    ]);
+    const withCredentials = new Set(userIdsWithCred.map((id) => id.toString()));
+    return users
+      .filter((u) => !(u.allowedServices ?? []).includes(service))
+      .map((u) => ({
+        id: u._id.toString(),
+        username: u.username,
+        email: u.email,
+        userType: u.userType,
+        hasCredentials: withCredentials.has(u._id.toString()),
+      }));
+  }
+
+  async getUsersWithAccess(service: string) {
+    const [users, userIdsWithCred] = await Promise.all([
+      this.usersService.getAllUsers(),
+      this.credentialsService.getUserIdsWithService(service),
+    ]);
+    const withCredentials = new Set(userIdsWithCred.map((id) => id.toString()));
+    return users
+      .filter((u) => (u.allowedServices ?? []).includes(service))
+      .map((u) => ({
+        id: u._id.toString(),
+        username: u.username,
+        email: u.email,
+        userType: u.userType,
+        hasCredentials: withCredentials.has(u._id.toString()),
+      }));
+  }
+
+  
+  async grantAccess(body: GrantAccessBody) {
+    const { service, targetUser } = body;
+    const user = await this.usersService.getUser(targetUser);
+    if (!user) throwException.Usernotfound();
+    if ((user.allowedServices ?? []).includes(service)) {
+      throwException.UserAlreadyHasAccess();
+    }
+    await this.usersService.addAllowedService(user._id.toString(), service);
+    return { success: true, service, targetUser };
+  }
+
+ 
+  async revokeAccess(body: GrantAccessBody) {
+    const { service, targetUser } = body;
+    const user = await this.usersService.getUser(targetUser);
+    if (!user) throwException.Usernotfound();
+    if (!(user.allowedServices ?? []).includes(service)) {
+      throwException.UserDoesNotHaveAccess();
+    }
+    await this.usersService.removeAllowedService(user._id.toString(), service);
+    return { success: true, service, targetUser };
+  }
+
+  
+  async registerCredential(body: RegisterCredentialBody, adminUserId: string) {
+    const { service, targetUser, autoRegister, username, password, email } =
+      body;
+
+    const userId = await this.usersService.getUserId(targetUser);
+    if (!userId) throwException.Usernotfound();
+
+    const existing = await this.credentialsService.getCredential(
+      userId,
+      service,
+    );
+    if (existing) throwCredentialsException.CredentialsAlreadyExist();
+
+    if (autoRegister === false) {
+      await this.credentialsService.setCredential(userId, service, {
+        username,
+        password,
+        email,
+      });
+      return { success: true, service, targetUser };
+    }
+
+    switch (service) {
+      case SERVICES_CONSTANTS.SERVICES.JELLYFIN:
+        await this.registerJellyfin(userId, targetUser, adminUserId);
+        break;
+      case SERVICES_CONSTANTS.SERVICES.RADARR:
+        await this.registerStaticService(
+          userId,
+          service,
+          this.configService.getRadarrServiceCredentials(),
+        );
+        break;
+      case SERVICES_CONSTANTS.SERVICES.SONARR:
+        await this.registerStaticService(
+          userId,
+          service,
+          this.configService.getSonarrServiceCredentials(),
+        );
+        break;
+      default:
+        throwCredentialsException.ServiceRegistrationFailed(
+          `Auto-registration is not supported for service "${service}"`,
+        );
+    }
+
+    return { success: true, service, targetUser };
+  }
+
+
+  async revokeCredential(body: GrantAccessBody, adminUserId: string) {
+    const { service, targetUser } = body;
+
+    const userId = await this.usersService.getUserId(targetUser);
+    if (!userId) throwException.Usernotfound();
+
+    const cred = await this.credentialsService.getCredential(userId, service);
+    if (!cred) throwCredentialsException.CredentialsNotFound();
+
+    await this.cleanupServiceCredential(userId, service, adminUserId, cred);
+
+    return { success: true, service, targetUser };
+  }
+
+ 
+  private async cleanupServiceCredential(
+    userId: string,
+    service: string,
+    adminUserId: string,
+    prefetchedCred?: { username?: string },
+  ) {
+    const cred =
+      prefetchedCred ??
+      (await this.credentialsService.getCredential(userId, service));
+    if (!cred) return;
+
+    if (service === SERVICES_CONSTANTS.SERVICES.JELLYFIN) {
+      try {
+        await this.jellyfinService.deleteUser(adminUserId, cred.username);
+      } catch (error:any) {
+        throwCredentialsException.JellyfinUserDeletionFailed(error.message);
+      }
+    }
+
+    await this.credentialsService.deleteCredential(userId, service);
+    await this.redis.del(`${service}:token:${userId}`);
+    await this.redis.del(`${service}:cookie:${userId}`);
+  }
+
+  /**
+   * All users except the requesting admin — the candidate list for deletion.
+   */
+  async getUsers(adminUserId: string) {
+    const users = await this.usersService.getAllUsers();
+    return users
+      .filter((u) => u._id.toString() !== adminUserId)
+      .map((u) => ({
+        id: u._id.toString(),
+        username: u.username,
+        email: u.email,
+        userType: u.userType,
+      }));
+  }
+
+  /**
+   * Delete a user and fully tear down their footprint: every stored credential
+   * and its real service account (e.g. Jellyfin), cached proxy tokens, and
+   * their sessions, then the user record itself. Aborts if a service cleanup
+   * fails (the user record is left intact). Admins cannot delete themselves.
+   */
+  async deleteUser(targetUser: string, adminUserId: string) {
+    const user = await this.usersService.getUser(targetUser);
+    if (!user) throwException.Usernotfound();
+
+    const userId = user._id.toString();
+    if (userId === adminUserId) throwException.CannotDeleteSelf();
+
+    const services = await this.credentialsService.getServicesForUser(userId);
+    for (const service of services) {
+      await this.cleanupServiceCredential(userId, service, adminUserId);
+    }
+
+    await this.sessionsService.deleteAllSessions(userId);
+    await this.usersService.deleteUser(user);
+
+    return { success: true, targetUser };
+  }
+
+  /**
+   * Jellyfin is multi-user: create a real account named after the Lunatria
+   * user, with a generated password, then store those credentials.
+   */
+  private async registerJellyfin(
+    userId: string,
+    username: string,
+    adminUserId: string,
+  ) {
+    const password = generateRandomPassword(JELLYFIN_PASSWORD_LENGTH);
+    try {
+      await this.jellyfinService.createUser(adminUserId, username, password);
+    } catch (error:any) {
+      throwCredentialsException.JellyfinUserCreationFailed(error.message);
+    }
+    await this.credentialsService.setCredential(
+      userId,
+      SERVICES_CONSTANTS.SERVICES.JELLYFIN,
+      { username, password },
+    );
+  }
+
+  
+  private async registerStaticService(
+    userId: string,
+    service: string,
+    creds: { username: string; password: string },
+  ) {
+    if (!creds.username || !creds.password) {
+      throwCredentialsException.AdminServiceCredentialsMissing();
+    }
+    await this.credentialsService.setCredential(userId, service, creds);
+  }
+}

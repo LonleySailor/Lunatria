@@ -21,8 +21,6 @@ export class RadarrService {
     }
   }
 
-
-
   async getRadarrCookie(userId: string): Promise<string> {
     const redisKey = `radarr:cookie:${userId}`;
     const cached = await this.redis.get(redisKey);

@@ -2,7 +2,6 @@ import { Component, OnInit, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { UserProfileService, UserProfile } from '../../services/user-profile.service';
-import { AuthService } from '../../services/auth.service';
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
@@ -14,7 +13,6 @@ import { TranslateModule } from '@ngx-translate/core';
 })
 export class UserProfileCircleComponent implements OnInit, OnDestroy {
   private userProfileService = inject(UserProfileService);
-  private authService = inject(AuthService);
   private router = inject(Router);
   
   userProfile: UserProfile | null = null;
@@ -54,7 +52,7 @@ export class UserProfileCircleComponent implements OnInit, OnDestroy {
 
   logout(): void {
     this.isDropdownOpen = false;
-    this.authService.logout();
+    this.router.navigate(['/logout']);
   }
 
   getInitials(): string {

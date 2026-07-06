@@ -1,0 +1,136 @@
+map $http_cookie $is_authenticated {
+    default 0;
+    ~*jellyfin_auth=true 1;
+}
+
+map $http_user_agent $is_ktor_client {
+    default 0;
+    ~*Ktor\s+client 1;
+}
+
+map $http_user_agent $is_android_webview {
+    default 0;
+    ~*wv\) 1;
+}
+
+map "$is_ktor_client$is_android_webview" $is_mobile_app_bootstrap {
+    default 0;
+    10 1;
+    01 1;
+    11 1;
+}
+
+
+map "$is_mobile_app_bootstrap$is_authenticated" $goes_to_jellyfin {
+    default 1;
+    "00" 0;
+}
+
+# Keep websocket compatibility
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ""      close;
+}
+
+upstream jellyfin_observe_upstream {
+    server jellyfin backend and port;
+}
+
+upstream lunatria_upstream {
+    server backend ip+port;
+}
+
+server {
+    if ($host = jellyfin.domain.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    server_name jellyfin.domain.com;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+    }
+
+    return 301 https://$host$request_uri;
+
+
+}
+
+server {
+    listen 443 ssl;
+    server_name jellyfin.domain.com;
+
+    # Base URL of the Lunatria portal (used for the unauthorized redirect).
+    set $portal_base_url https://domain.com;
+
+    location = /jellyfin-logout {
+        proxy_pass http://lunatria_upstream/jellyfin-logout.html;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location = /jellyfin-login-bridge.html {
+        proxy_pass http://lunatria_upstream/jellyfin-login-bridge.html;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Test adapter: intercept app login and route to Lunatria backend
+    location = /Users/authenticatebyname {
+        proxy_pass http://lunatria_upstream/jellyfin/app-auth;
+        proxy_http_version 1.1;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Content-Type application/json;
+
+        # Preserve JSON body for credential validation
+        proxy_request_buffering on;
+    }
+
+    # App traffic and cookie-authenticated web traffic go straight to Jellyfin;
+    # unauthenticated web traffic goes to the Lunatria backend, which sets the
+    # jellyfin_auth cookie and redirects to the login bridge.
+    location / {
+        error_page 401 = @handle_unauth;
+
+        if ($goes_to_jellyfin) {
+            proxy_pass http://jellyfin_observe_upstream;
+        }
+
+        proxy_pass http://lunatria_upstream/jellyfin/;
+        proxy_intercept_errors on;
+        proxy_http_version 1.1;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # WebSocket support
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+    }
+
+    # 401s: the app gets the status back untouched so it can re-authenticate,
+    # browsers get sent to the portal.
+    location @handle_unauth {
+        if ($is_mobile_app_bootstrap) {
+            return 401;
+        }
+        return 302 $portal_base_url/unauthorized?source=jellyfin;
+    }
+
+    ssl_certificate ssl_certificate goes here;
+    ssl_certificate_key ssl_certificate_key goes here;
+}
