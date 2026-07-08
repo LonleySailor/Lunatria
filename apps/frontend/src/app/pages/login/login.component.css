@@ -86,3 +86,12 @@
     background: rgba(255, 255, 255, 0.1);
     cursor: not-allowed;
   } 
+.demo-password {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 20px;
+    color: white;
+    font-size: 0.9rem;
+    text-align: center;
+   }

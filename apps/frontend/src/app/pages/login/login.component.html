@@ -9,6 +9,11 @@
         <button (click)="logout()">{{ 'AUTH.LOGOUT' | translate }}</button>
       </div>
       <form *ngIf="!isSessionActive" (ngSubmit)="onSubmit()" #loginForm="ngForm">
+          <div class="demo-password">
+            <p>Demo Credentials:</p>
+            <p>Username: <strong>lunatria-demo</strong></p>
+            <p>Password: <strong>Y8x0nm5VDfATDH</strong></p>
+          </div>
         <div class="form-group">
           <input
             type="text"
